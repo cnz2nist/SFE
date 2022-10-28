@@ -169,6 +169,18 @@ n,i,-delta_gypsum-dw_center_right/numw_center_right*(i-nummax-1),0,0
 *enddo
 n,,-delta_gypsum-dw_center_right+delta_gypsum,0,0
 
+*get,nummax,node,,count
+*do,i,nummax+1,num_center_floor+nummax+1      !top floor nodes          
+n,i,0,delta_gypsum+df_center/num_center_floor*(i-nummax-1),0
+*enddo
+n,,0,delta_gypsum+df_center+delta_gypsum,0
+
+*get,nummax,node,,count
+*do,i,nummax+1,num_center_floor+nummax+1      !bottom floor nodes          
+n,i,0,-delta_gypsum-df_center/num_center_floor*(i-nummax-1),0
+*enddo
+n,,0,-delta_gypsum-df_center+delta_gypsum,0
+
 type,4
 mat,6
 real,1
