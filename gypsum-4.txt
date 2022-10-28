@@ -60,10 +60,10 @@ mp,dens,5,1e-3             !perfect conductor
 mp,c,5,1e-3
 mp,kxx,5,1e8
 mp,dens,6,rho_air
-mp,c,6,c_air
+mp,c,6,c_air        
 mp,kxx,6,k_air
-mp,hf,6,hc_fire            !film coefficient at fire exposed                  
-mp,hf,7,hc_fire            !film coefficient at air exposed
+mp,hf,7,hc_fire            !film coefficient at fire exposed                  
+mp,hf,8,hc_fire            !film coefficient at air exposed
 --------------center room -------------------
 --------------geometry----------------------- 
 W_center=10                                   !room width, m
@@ -126,28 +126,44 @@ ls_center=H_center                           !steel length, m
 Vs_center=ls_center*(2*bs_center*tf_center+(hs_center-2*tf_center)*tw_center)    !steel volume, m3
 As_center=ls_center*(2*hs_center+4*bs_center-2*tw_center)
 -------------convection factor at opening-----------
-!mp,hf,8,0.5*Ao_center*(Ho_center)**(1/2)*c_air/Ao_center     !effective covection factor considering heat loss by gas exchange at opening
+!mp,hf,9,0.5*Ao_center*(Ho_center)**(1/2)*c_air/Ao_center     !effective covection factor considering heat loss by gas exchange at opening
 *do,i,1,25
 temps=50*(i-1)
 cp=0.187*(temps+273)+952
 mptemp,i,temps
-mpdata,hf,8,i,0.5*Ao_center*(Ho_center)**(1/2)*cp/Ao_center
+mpdata,hf,9,i,0.5*Ao_center*(Ho_center)**(1/2)*cp/Ao_center
 *enddo 
 ------------real constants-----------------------
 r,1,Vr_center              !mass71, gas volume
 r,2,Vs_center              !mass71, steel volume
-r,3,Aw1_center             !front wall
-r,4,Aw2_center             !back wall
-r,5,Aw3_center             !left wall
-r,6,Aw4_center             !right wall
+r,3,Aw_center_front             !front wall
+r,4,Aw_center_back             !back wall
+r,5,Aw_center_left             !left wall
+r,6,Aw_center_right             !right wall
 r,7,Af_center              !floor slab
 r,8,Ao_center              !opening
 r,9,As_center              !steel                  
 
 ---------model gas volume----------
 type,4
-mat,
+mat,6
 n,1,0,0
+real,1
+e,1
+---------model wall----------
+*do,i,2,numw_center_front+2
+n,i,0,dwmin_center+dw_center_front/numw_center_front*(i-2),0
+*enddo
+type,1
+mat,1
+real,3
+*do,i,2,numw_center_front+1
+e,i,i+1
+*enddo
+
+numw_center_front
+
+
 k,2,dw,0
 l,1,2,numw
 type,1
@@ -155,13 +171,6 @@ mat,1
 real,1
 lmesh,1
 
-type,4
-mat,2
-real,6
-e,numw+3
-mat,3
-real,7
-e,numw+6
 
 r,1,At                     !link32, wall conduction
 r,2,At,1,emisr*emisw,stef  !link31, fire exposed
