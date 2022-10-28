@@ -3,41 +3,67 @@
 /prep7
 --------------constant----------------------
 stef=5.67e-8      !Stefan-Boltzman constant, J/(sm2K4)
-hfl=35            !film coefficient at fire exposed surface, W/m2K
-hfr=9             !film coefficient at air exposed surface, W/m2K
+hc_fire=35        !film coefficient at fire exposed surface, W/m2K
+hc_air=9          !film coefficient at air exposed surface, W/m2K
 -------------numerical factor-------------------
 M=4               !factor controlling numerical accuracy,M=dx*dx/alpha/dt
 --------------material properties---------------
 --------------gypsum board, Buchanan------------
-rho_gypsum=800          !wall density, kg/m3
-c_gypsum=1700           !wall sepcfic heat, J/(kgK)
-k_gypsum=0.2            !wall conductivity, W/mK
-emis_gypsum=0.8                          !wall emissivity
-alpha_gypsum=k_gypsum/rho_gypsum/c_gypsum !wall diffusivity
-delta_gypsum=(M*alpha_gypsum*10)**(1/2)  !mesh size of the wall
+rho_gypsum=800                            !density, kg/m3
+c_gypsum=1700                             !sepcfic heat, J/(kgK)
+k_gypsum=0.2                              !conductivity, W/mK
+emis_gypsum=0.8                           !emissivity
+alpha_gypsum=k_gypsum/rho_gypsum/c_gypsum !diffusivity
+delta_gypsum=(M*alpha_gypsum*10)**(1/2)   !mesh size
 -------------NWC, Buchanan----------------------
-rhof=2300         !floor density, kg/m3
-cf=1000           !floor sepcfic heat, J/(kgK)
-kf=1.6            !floor conductivity, W/mK
-emisf=0.8         !floor emissivity
-alphaf=kf/rhof/cf !floor diffusivity
-deltaf=(M*alphaf*10)**(1/2)  !mesh size of the floor
+rho_NWC=2300         
+c_NWC=1000           
+k_NWC=1.6            
+emis_NWC=0.8                       
+alpha_NWC=k_NWC/rho_NWC/c_NWC 
+delta_NWC=(M*alpha_NWC*10)**(1/2)  
 --------------steel-----------------------------
-rhos=7850         !steel density, kg/m3
-cs=600            !steel specific heat, J/(kgK)
-ks=45             !steel conductivity, W/mK
-emiss=0.8         !steel emissivity
+rho_steel=7850         
+c_steel=600            
+k_steel=45            
+emis_steel=0.8        
 --------------SFRM------------------------------
-rhoi=250          !insulation density, kg/m3
-ci=800            !insulation specific heat, J/(kgK)
-ki=0.12           !insulation conductivity, W/mK
-emisi=0.8         !insulation emissivity
-alphai=ki/rhoi/ci !insulation diffusivity
-deltai=(M*alphai*10)**(1/2)  !mesh size of the insulation
+rho_SFRM=250          
+c_SFRM=800            
+k_SFRM=0.12          
+emis_SFRM=0.8         
+alpha_SFRM=k_SFRM/rho_SFRM/c_SFRM 
+delta_SFRM=(M*alpha_SFRM*10)**(1/2)  
 -------------air -------------------------------
-rhoa=1.2          !air conductivity, kg/m3
-ca=1000           !air specific heat, J/(kgK)
-ka=0.023          !air conductivity, W/mK
+rho_air=1.2          
+c_air=1000           
+k_air=0.023 
+------------element types-----------------------
+et,1,link32                !conduction bar
+et,2,link31                !radiation bar
+et,3,link34                !convection bar
+et,4,mass71,,,0            !lumped mass
+------------mats---------------------------------
+mp,dens,1,rho_gypsum             
+mp,c,1,c_gypsum
+mp,kxx,1,k_gypsum
+mp,dens,2,rho_NWC
+mp,c,2,c_NWC
+mp,kxx,2,k_NWC
+mp,dens,3,rho_steel
+mp,c,3,c_steel
+mp,kxx,3,k_steel
+mp,dens,4,rho_SFRM
+mp,c,4,c_SFRM
+mp,kxx,4,k_SFRM
+mp,dens,5,1e-3             !perfect conductor
+mp,c,5,1e-3
+mp,kxx,5,1e8
+mp,dens,6,rho_air
+mp,c,6,c_air
+mp,kxx,6,k_air
+mp,hf,6,hc_fire            !film coefficient at fire exposed                  
+mp,hf,7,hc_fire            !film coefficient at air exposed
 --------------center room -------------------
 --------------geometry----------------------- 
 W_center=10                                   !room width, m
@@ -48,11 +74,11 @@ Af_center=W_center*D_center                   !floor area, m2
 Wo_center=6                                   !open width, m
 Ho_center=1.5                                 !open height, m
 Ao_center=Wo_center*Ho_center                 !open area, m2
-Aw1_center=W_center*H_center-Ao_center        !front wall, m2
-Aw2_center=W_center*H_center                  !back wall, m2
-Aw3_center=D_center*H_center                  !left wall, m2
-Aw4_center=D_center*H_center                  !right wall, m2
-At_center=Aw1_center+Aw2_center+Aw3_center+Aw4_center+2*Af_center         !total area not inclue open, m2
+Aw_center_front=W_center*H_center-Ao_center        !front wall, m2
+Aw_center_back=W_center*H_center                  !back wall, m2
+Aw_center_left=D_center*H_center                  !left wall, m2
+Aw_center_right=D_center*H_center                  !right wall, m2
+At_center=Aw_center_front+Aw_center_back+Aw_center_left+Aw_center_right+2*Af_center         !total area not inclue open, m2
 emisr_center=1-exp(-1.1*H_center)             !gas emissivity
 --------------HRR----------------------------
 alpha_center=1000/300/300*1000                       !fire factor, W/s2
@@ -78,60 +104,36 @@ HRR_center(i,1)=max(0,Qmax_center/t3_center*(t1_center+t2_center+t3_center-10*(i
 *endif
 *enddo
 ----------------division of slabs--------------
-dw1_center=100/1000                           !front wall thickness,m
-dw2_center=100/1000                           !back wall thickness,m
-dw3_center=100/1000                           !left wall thickness,m
-dw4_center=100/1000                           !right wall thickness,m
-dwmin_center=min(dw1_center,dw2_center,dw3_center,dw4_center)
-numw1_center=nint(dw1_center/deltaw)
-numw2_center=nint(dw2_center/deltaw)
-numw3_center=nint(dw3_center/deltaw)
-numw4_center=nint(dw4_center/deltaw)
+dw_center_front=100/1000                           !front wall thickness,m
+dw_center_back=100/1000                           !back wall thickness,m
+dw_center_left=100/1000                           !left wall thickness,m
+dw_center_right=100/1000                           !right wall thickness,m
+dwmin_center=min(dw_center_front,dw_center_back,dw_center_left,dw_center_right)
+numw_center_front=nint(dw_center_front/delta_gypsum)
+numw_center_back=nint(dw_center_back/delta_gypsum)
+numw_center_left=nint(dw_center_left/delta_gypsum)
+numw_center_right=nint(dw_center_right/delta_gypsum)
 df_center=200/1000                           !floor thickness, m
-numf_center=nint(df_center/deltaf)
+num_center_floor=nint(df_center/delta_NWC)
 -------------steel members----------------------
-bs_center=400/1000                           !steel section H200*200*8*12
+bs_center=400/1000                           !steel section H400*400*13*21
 hs_center=400/1000
 tf_center=21/1000
 tw_center=13/1000
 di_center=10/1000                            !insulation thickness, m
-numi_center=nint(di_center/deltai)
+numi_center=nint(di_center/delta_SFRM)
 ls_center=H_center                           !steel length, m
 Vs_center=ls_center*(2*bs_center*tf_center+(hs_center-2*tf_center)*tw_center)    !steel volume, m3
 As_center=ls_center*(2*hs_center+4*bs_center-2*tw_center)
-
-/prep7
-et,1,link32                !conduction bar
-et,2,link31                !radiation bar
-et,3,link34                !convection bar
-et,4,mass71,,,0            !lumped mass
-
-mp,dens,1,rhow             !
-mp,c,1,cw
-mp,kxx,1,kw
-mp,dens,2,rhoa
-mp,c,2,ca
-mp,kxx,2,ka
-mp,dens,3,rhos
-mp,c,3,cs
-mp,kxx,3,ks
-mp,dens,4,1e-3
-mp,c,4,1e-3
-mp,kxx,4,1e8
-mp,hf,5,hfl
-mp,hf,6,hfr
-!mp,hf,7,0.5*Ao*(Ho)**(1/2)*ca/Ao     !effective covection factor considering heat loss by gas exchange at opening
+-------------convection factor at opening-----------
+!mp,hf,8,0.5*Ao_center*(Ho_center)**(1/2)*c_air/Ao_center     !effective covection factor considering heat loss by gas exchange at opening
 *do,i,1,25
 temps=50*(i-1)
 cp=0.187*(temps+273)+952
 mptemp,i,temps
-mpdata,hf,7,i,0.5*Ao*(Ho)**(1/2)*cp/Ao
+mpdata,hf,8,i,0.5*Ao_center*(Ho_center)**(1/2)*cp/Ao_center
 *enddo 
-mp,dens,8,rhoi
-mp,c,8,ci
-mp,kxx,8,ki
-
-
+------------real constants-----------------------
 r,1,Vr_center              !mass71, gas volume
 r,2,Vs_center              !mass71, steel volume
 r,3,Aw1_center             !front wall
@@ -142,9 +144,24 @@ r,7,Af_center              !floor slab
 r,8,Ao_center              !opening
 r,9,As_center              !steel                  
 
+---------model gas volume----------
+type,4
+mat,
+n,1,0,0
+k,2,dw,0
+l,1,2,numw
+type,1
+mat,1
+real,1
+lmesh,1
 
-
-
+type,4
+mat,2
+real,6
+e,numw+3
+mat,3
+real,7
+e,numw+6
 
 r,1,At                     !link32, wall conduction
 r,2,At,1,emisr*emisw,stef  !link31, fire exposed
@@ -158,31 +175,6 @@ r,9,4*Ai,1,emisr*emiss,stef  !link31
 r,10,4*Ai                    !link34
 r,11,At,1,emisw,stef       !link31, wall radiation to air
 r,12,4*As                    !link32
-mp,dens,1,rhow
-mp,c,1,cw
-mp,kxx,1,kw
-mp,dens,2,rhoa
-mp,c,2,ca
-mp,kxx,2,ka
-mp,dens,3,rhos
-mp,c,3,cs
-mp,kxx,3,ks
-mp,dens,4,1e-3
-mp,c,4,1e-3
-mp,kxx,4,1e8
-mp,hf,5,hfl
-mp,hf,6,hfr
-!mp,hf,7,0.5*Ao*(Ho)**(1/2)*ca/Ao     !effective covection factor considering heat loss by gas exchange at opening
-*do,i,1,25
-temps=50*(i-1)
-cp=0.187*(temps+273)+952
-mptemp,i,temps
-mpdata,hf,7,i,0.5*Ao*(Ho)**(1/2)*cp/Ao
-*enddo 
-mp,dens,8,rhoi
-mp,c,8,ci
-mp,kxx,8,ki
-
 
 ---------model wall----------
 k,1,0,0
