@@ -1,0 +1,265 @@
+/config,nres,10000000
+/config,nproc,2
+/prep7
+--------------constant----------------------
+stef=5.67e-8      !Stefan-Boltzman constant, J/(sm2K4)
+hfl=35            !film coefficient at fire exposed surface, W/m2K
+hfr=9             !film coefficient at air exposed surface, W/m2K
+-------------numerical factor-------------------
+M=4               !factor controlling numerical accuracy,M=dx*dx/alpha/dt
+--------------material properties---------------
+--------------gypsum board, Buchanan------------
+rho_gypsum=800          !wall density, kg/m3
+c_gypsum=1700           !wall sepcfic heat, J/(kgK)
+k_gypsum=0.2            !wall conductivity, W/mK
+emis_gypsum=0.8                          !wall emissivity
+alpha_gypsum=k_gypsum/rho_gypsum/c_gypsum !wall diffusivity
+delta_gypsum=(M*alpha_gypsum*10)**(1/2)  !mesh size of the wall
+-------------NWC, Buchanan----------------------
+rhof=2300         !floor density, kg/m3
+cf=1000           !floor sepcfic heat, J/(kgK)
+kf=1.6            !floor conductivity, W/mK
+emisf=0.8         !floor emissivity
+alphaf=kf/rhof/cf !floor diffusivity
+deltaf=(M*alphaf*10)**(1/2)  !mesh size of the floor
+--------------steel-----------------------------
+rhos=7850         !steel density, kg/m3
+cs=600            !steel specific heat, J/(kgK)
+ks=45             !steel conductivity, W/mK
+emiss=0.8         !steel emissivity
+--------------SFRM------------------------------
+rhoi=250          !insulation density, kg/m3
+ci=800            !insulation specific heat, J/(kgK)
+ki=0.12           !insulation conductivity, W/mK
+emisi=0.8         !insulation emissivity
+alphai=ki/rhoi/ci !insulation diffusivity
+deltai=(M*alphai*10)**(1/2)  !mesh size of the insulation
+-------------air -------------------------------
+rhoa=1.2          !air conductivity, kg/m3
+ca=1000           !air specific heat, J/(kgK)
+ka=0.023          !air conductivity, W/mK
+--------------center room -------------------
+--------------geometry----------------------- 
+W_center=10                                   !room width, m
+D_center=7                                    !room depth, m
+H_center=3.8                                  !room height, m
+Vr_center=W_center*D_center*H_center          !room volume, m3
+Af_center=W_center*D_center                   !floor area, m2
+Wo_center=6                                   !open width, m
+Ho_center=1.5                                 !open height, m
+Ao_center=Wo_center*Ho_center                 !open area, m2
+Aw1_center=W_center*H_center-Ao_center        !front wall, m2
+Aw2_center=W_center*H_center                  !back wall, m2
+Aw3_center=D_center*H_center                  !left wall, m2
+Aw4_center=D_center*H_center                  !right wall, m2
+At_center=Aw1_center+Aw2_center+Aw3_center+Aw4_center+2*Af_center         !total area not inclue open, m2
+emisr_center=1-exp(-1.1*H_center)             !gas emissivity
+--------------HRR----------------------------
+alpha_center=1000/300/300*1000                       !fire factor, W/s2
+qf_center=600e6                                      !fire load per unit floor area, J/m2
+qfuelmax_center=250e3                                !fuel controlled max HRRPUA, W/m2
+Qmaxfuel_center=qfuelmax_center*Af_center            !fuel controlled max HRR, W
+Qmaxopen_center=1500*Ao_center*Ho_center**(1/2)*1000 !open controlled max HRR, W
+Qmax_center=Qmaxopen_center
+!Qmax_center=min(Qmaxfuel_center,Qmaxopen_center)    !max HRR
+t1_center=(Qmax_center/alpha_center)**(1/2)          !develop duration, s
+Q1_center=1/3*Qmax_center*t1_center                  !Heat cnsumed in developng stage, W
+t2_center=(0.7*qf_center*Af_center-Q1_center)/Qmax_center          !steady duration, s
+t3_center=0.6*qf_center*Af_center/Qmax_center        !decay duration,s
+*dim,HRR_center,table,3601,1,,time
+*do,i,1,3601
+HRR_center(i,0)=(i-1)*10
+*if,10*(i-1),le,t1_center,then
+HRR_center(i,1)=alpha_center*100*(i-1)*(i-1)
+*elseif,10*(i-1),le,t1_center+t2_center
+HRR_center(i,1)=Qmax_center
+*else
+HRR_center(i,1)=max(0,Qmax_center/t3_center*(t1_center+t2_center+t3_center-10*(i-1)))
+*endif
+*enddo
+----------------division of slabs--------------
+dw1_center=100/1000                           !front wall thickness,m
+dw2_center=100/1000                           !back wall thickness,m
+dw3_center=100/1000                           !left wall thickness,m
+dw4_center=100/1000                           !right wall thickness,m
+dwmin_center=min(dw1_center,dw2_center,dw3_center,dw4_center)
+numw1_center=nint(dw1_center/deltaw)
+numw2_center=nint(dw2_center/deltaw)
+numw3_center=nint(dw3_center/deltaw)
+numw4_center=nint(dw4_center/deltaw)
+df_center=200/1000                           !floor thickness, m
+numf_center=nint(df_center/deltaf)
+-------------steel members----------------------
+bs_center=400/1000                           !steel section H200*200*8*12
+hs_center=400/1000
+tf_center=21/1000
+tw_center=13/1000
+di_center=10/1000                            !insulation thickness, m
+numi_center=nint(di_center/deltai)
+ls_center=H_center                           !steel length, m
+Vs_center=ls_center*(2*bs_center*tf_center+(hs_center-2*tf_center)*tw_center)    !steel volume, m3
+As_center=ls_center*(2*hs_center+4*bs_center-2*tw_center)
+
+/prep7
+et,1,link32                !conduction bar
+et,2,link31                !radiation bar
+et,3,link34                !convection bar
+et,4,mass71,,,0            !lumped mass
+
+mp,dens,1,rhow             !
+mp,c,1,cw
+mp,kxx,1,kw
+mp,dens,2,rhoa
+mp,c,2,ca
+mp,kxx,2,ka
+mp,dens,3,rhos
+mp,c,3,cs
+mp,kxx,3,ks
+mp,dens,4,1e-3
+mp,c,4,1e-3
+mp,kxx,4,1e8
+mp,hf,5,hfl
+mp,hf,6,hfr
+!mp,hf,7,0.5*Ao*(Ho)**(1/2)*ca/Ao     !effective covection factor considering heat loss by gas exchange at opening
+*do,i,1,25
+temps=50*(i-1)
+cp=0.187*(temps+273)+952
+mptemp,i,temps
+mpdata,hf,7,i,0.5*Ao*(Ho)**(1/2)*cp/Ao
+*enddo 
+mp,dens,8,rhoi
+mp,c,8,ci
+mp,kxx,8,ki
+
+
+r,1,Vr_center              !mass71, gas volume
+r,2,Vs_center              !mass71, steel volume
+r,3,Aw1_center             !front wall
+r,4,Aw2_center             !back wall
+r,5,Aw3_center             !left wall
+r,6,Aw4_center             !right wall
+r,7,Af_center              !floor slab
+r,8,Ao_center              !opening
+r,9,As_center              !steel                  
+
+
+
+
+
+r,1,At                     !link32, wall conduction
+r,2,At,1,emisr*emisw,stef  !link31, fire exposed
+r,3,Ao,1,emisr,stef        !link31, open radiation
+r,4,At                     !link34, wall convection
+r,5,Ao                     !link34, open convection
+r,6,Vr-4*Vs                     !mass71,air
+r,7,4*Vs                     !mass71,steel
+r,8,1/0.5/deltaw           !link32, HRR
+r,9,4*Ai,1,emisr*emiss,stef  !link31
+r,10,4*Ai                    !link34
+r,11,At,1,emisw,stef       !link31, wall radiation to air
+r,12,4*As                    !link32
+mp,dens,1,rhow
+mp,c,1,cw
+mp,kxx,1,kw
+mp,dens,2,rhoa
+mp,c,2,ca
+mp,kxx,2,ka
+mp,dens,3,rhos
+mp,c,3,cs
+mp,kxx,3,ks
+mp,dens,4,1e-3
+mp,c,4,1e-3
+mp,kxx,4,1e8
+mp,hf,5,hfl
+mp,hf,6,hfr
+!mp,hf,7,0.5*Ao*(Ho)**(1/2)*ca/Ao     !effective covection factor considering heat loss by gas exchange at opening
+*do,i,1,25
+temps=50*(i-1)
+cp=0.187*(temps+273)+952
+mptemp,i,temps
+mpdata,hf,7,i,0.5*Ao*(Ho)**(1/2)*cp/Ao
+*enddo 
+mp,dens,8,rhoi
+mp,c,8,ci
+mp,kxx,8,ki
+
+
+---------model wall----------
+k,1,0,0
+k,2,dw,0
+l,1,2,numw
+type,1
+mat,1
+real,1
+lmesh,1
+--------BC at air exposed-----
+n,numw+2,dw+deltaw,0
+type,2
+real,11
+e,numw+1,numw+2
+type,3
+real,4
+mat,6
+e,numw+1,numw+2
+--------BC at fire exposed-----
+n,numw+3,-deltaw,0
+type,2
+real,2
+e,numw+3,1
+type,3
+real,4
+mat,5
+e,numw+3,1
+--------BC at opening----------
+type,2
+real,3
+n,numw+4,-deltaw,-deltaw
+e,numw+3,numw+4
+type,3
+mat,7
+real,5
+e,numw+3,numw+4
+--------heat flux to steel----------
+k,numw+5,-deltaw,deltaw
+k,numw+numi,-deltaw,deltaw+di
+l,numw+5,numw+numi,numi-1
+type,1
+real,12
+mat,8
+lmesh,2
+real,9
+e,numw+3,numw+5
+type,3
+real,10
+mat,5
+e,numw+3,numw+5
+-------lumped mass-------------
+type,4
+mat,2
+real,6
+e,numw+3
+mat,3
+real,7
+e,numw+6
+--------HRR-------------------
+n,numw+6+numi,-1.5*deltaw,0
+type,1
+mat,4
+real,8
+e,numw+6+numi,numw+3
+---------load------------------------
+toffset,273
+tunif,20
+esel,s,mat,,4
+bfe,all,hgen,,%HRR%
+d,numw+2,temp,20
+d,numw+4,temp,20
+allsel
+/solu
+antype,4
+autots,on
+deltim,10,0.1,100
+time,12000
+outres,all,all
+allsel
+solve
