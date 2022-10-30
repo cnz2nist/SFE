@@ -184,7 +184,12 @@ n,,0,-delta_gypsum-df_center+delta_gypsum,0
 type,4
 mat,6
 real,1
-e,1                      !center gas volume mass
+node_center=node(0,0,0)
+e,node_center                      !center gas volume mass
+
+real,1
+node_center=node(0,0,0)
+e,node_center                      !center gas volume mass
 
 type,1
 mat,1
