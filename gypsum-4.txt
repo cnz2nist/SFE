@@ -39,23 +39,27 @@ rho_air=1.2
 c_air=1000           
 k_air=0.023 
 ------------element types-----------------------
-et,1,link32                !conduction bar
-et,2,link31                !radiation bar
-et,3,link34                !convection bar
-et,4,mass71,,,0            !lumped mass
+et,32,link32                !conduction bar
+et,31,link31                !radiation bar
+et,34,link34                !convection bar
+et,71,mass71,,,0            !lumped mass
 ------------mats---------------------------------
 mp,dens,1,rho_gypsum             
 mp,c,1,c_gypsum
 mp,kxx,1,k_gypsum
+mp,emis,1,emis_gypsum
 mp,dens,2,rho_NWC
 mp,c,2,c_NWC
 mp,kxx,2,k_NWC
+mp,kxx,2,emis_NWC
 mp,dens,3,rho_steel
 mp,c,3,c_steel
 mp,kxx,3,k_steel
+mp,emis,3,emis_steel
 mp,dens,4,rho_SFRM
 mp,c,4,c_SFRM
 mp,kxx,4,k_SFRM
+mp,emis,4,emis_SFRM
 mp,dens,5,1e-3             !perfect conductor
 mp,c,5,1e-3
 mp,kxx,5,1e8
@@ -63,23 +67,23 @@ mp,dens,6,rho_air
 mp,c,6,c_air        
 mp,kxx,6,k_air
 mp,hf,7,hc_fire            !film coefficient at fire exposed                  
-mp,hf,8,hc_fire            !film coefficient at air exposed
---------------center room -------------------
---------------geometry----------------------- 
+mp,hf,8,hc_air             !film coefficient at air exposed
+--------------center room --------------------
+--------------geometry------------------------
 W_center=10                                   !room width, m
 D_center=7                                    !room depth, m
 H_center=3.8                                  !room height, m
 Vr_center=W_center*D_center*H_center          !room volume, m3
 Af_center=W_center*D_center                   !floor area, m2
-Wo_center=6                                   !open width, m
-Ho_center=1.5                                 !open height, m
+Wo_center=6                                   !open width, m, front wall
+Ho_center=1.5                                 !open height, m, front wall
 Ao_center=Wo_center*Ho_center                 !open area, m2
 Aw_center_front=W_center*H_center-Ao_center        !front wall, m2
-Aw_center_back=W_center*H_center                  !back wall, m2
-Aw_center_left=D_center*H_center                  !left wall, m2
+Aw_center_back=W_center*H_center                   !back wall, m2
+Aw_center_left=D_center*H_center                   !left wall, m2
 Aw_center_right=D_center*H_center                  !right wall, m2
 At_center=Aw_center_front+Aw_center_back+Aw_center_left+Aw_center_right+2*Af_center         !total area not inclue open, m2
-emisr_center=1-exp(-1.1*H_center)             !gas emissivity
+emisr_center=1-exp(-1.1*H_center)                  !gas emissivity
 --------------HRR----------------------------
 alpha_center=1000/300/300*1000                       !fire factor, W/s2
 qf_center=600e6                                      !fire load per unit floor area, J/m2
@@ -132,17 +136,685 @@ temps=50*(i-1)
 cp=0.187*(temps+273)+952
 mptemp,i,temps
 mpdata,hf,9,i,0.5*Ao_center*(Ho_center)**(1/2)*cp/Ao_center
-*enddo 
+*enddo
+--------------left room ----------------------
+--------------geometry------------------------
+W_left=10                                   !room width, m
+D_left=7                                    !room depth, m
+H_left=3.8                                  !room height, m
+Vr_left=W_left*D_left*H_left          !room volume, m3
+Af_left=W_left*D_left                   !floor area, m2
+Wo_left=6                                   !open width, m, front wall
+Ho_left=1.5                                 !open height, m, front wall
+Ao_left=Wo_left*Ho_left                 !open area, m2
+Aw_left_front=W_left*H_left-Ao_left        !front wall, m2
+Aw_left_back=W_left*H_left                  !back wall, m2
+Aw_left_left=D_left*H_left                  !left wall, m2
+Aw_left_right=D_left*H_left                  !right wall, m2
+At_left=Aw_left_front+Aw_left_back+Aw_left_left+Aw_left_right+2*Af_left         !total area not inclue open, m2
+emisr_left=1-exp(-1.1*H_left)             !gas emissivity
+--------------HRR----------------------------
+alpha_left=1000/300/300*1000                       !fire factor, W/s2
+qf_left=600e6                                      !fire load per unit floor area, J/m2
+qfuelmax_left=250e3                                !fuel controlled max HRRPUA, W/m2
+Qmaxfuel_left=qfuelmax_left*Af_left            !fuel controlled max HRR, W
+Qmaxopen_left=1500*Ao_left*Ho_left**(1/2)*1000 !open controlled max HRR, W
+Qmax_left=Qmaxopen_left
+!Qmax_left=min(Qmaxfuel_left,Qmaxopen_left)    !max HRR
+t1_left=(Qmax_left/alpha_left)**(1/2)          !develop duration, s
+Q1_left=1/3*Qmax_left*t1_left                  !Heat cnsumed in developng stage, W
+t2_left=(0.7*qf_left*Af_left-Q1_left)/Qmax_left          !steady duration, s
+t3_left=0.6*qf_left*Af_left/Qmax_left        !decay duration,s
+*dim,HRR_left,table,3601,1,,time
+*do,i,1,3601
+HRR_left(i,0)=(i-1)*10
+*if,10*(i-1),le,t1_left,then
+HRR_left(i,1)=alpha_left*100*(i-1)*(i-1)
+*elseif,10*(i-1),le,t1_left+t2_left
+HRR_left(i,1)=Qmax_left
+*else
+HRR_left(i,1)=max(0,Qmax_left/t3_left*(t1_left+t2_left+t3_left-10*(i-1)))
+*endif
+*enddo
+----------------division of walls and floors--------------
+dw_left_front=100/1000                           !front wall thickness,m
+dw_left_back=100/1000                           !back wall thickness,m
+dw_left_left=100/1000                           !left wall thickness,m
+dw_left_right=100/1000                           !right wall thickness,m
+dwmin_left=min(dw_left_front,dw_left_back,dw_left_left,dw_left_right)
+numw_left_front=nint(dw_left_front/delta_gypsum)
+numw_left_back=nint(dw_left_back/delta_gypsum)
+numw_left_left=nint(dw_left_left/delta_gypsum)
+numw_left_right=nint(dw_left_right/delta_gypsum)
+df_left=200/1000                           !floor thickness, m
+num_left_floor=nint(df_left/delta_NWC)
+-------------steel members----------------------
+bs_left=400/1000                           !steel section H400*400*13*21
+hs_left=400/1000
+tf_left=21/1000
+tw_left=13/1000
+di_left=10/1000                            !insulation thickness, m
+numi_left=nint(di_left/delta_SFRM)
+ls_left=H_left                           !steel length, m
+Vs_left=ls_left*(2*bs_left*tf_left+(hs_left-2*tf_left)*tw_left)    !steel volume, m3
+As_left=ls_left*(2*hs_left+4*bs_left-2*tw_left)
+-------------convection factor at opening-----------
+!mp,hf,10,0.5*Ao_left*(Ho_left)**(1/2)*c_air/Ao_left     !effective covection factor considering heat loss by gas exchange at opening
+*do,i,1,25
+temps=50*(i-1)
+cp=0.187*(temps+273)+952
+mptemp,i,temps
+mpdata,hf,10,i,0.5*Ao_left*(Ho_left)**(1/2)*cp/Ao_left
+*enddo
+--------------right room --------------------------
+--------------geometry-----------------------------
+W_right=10                                   !room width, m
+D_right=7                                    !room depth, m
+H_right=3.8                                  !room height, m
+Vr_right=W_right*D_right*H_right             !room volume, m3
+Af_right=W_right*D_right                     !floor area, m2
+Wo_right=6                                   !open width, m, front wall
+Ho_right=1.5                                 !open height, m, front wall
+Ao_right=Wo_right*Ho_right                   !open area, m2
+Aw_right_front=W_right*H_right-Ao_right      !front wall, m2
+Aw_right_back=W_right*H_right                !back wall, m2
+Aw_right_left=D_right*H_right                !left wall, m2
+Aw_right_right=D_right*H_right               !right wall, m2
+At_right=Aw_right_front+Aw_right_back+Aw_right_left+Aw_right_right+2*Af_right         !total area not inclue open, m2
+emisr_right=1-exp(-1.1*H_right)             !gas emissivity
+--------------HRR----------------------------
+alpha_right=1000/300/300*1000                       !fire factor, W/s2
+qf_right=600e6                                      !fire load per unit floor area, J/m2
+qfuelmax_right=250e3                                !fuel controlled max HRRPUA, W/m2
+Qmaxfuel_right=qfuelmax_right*Af_right            !fuel controlled max HRR, W
+Qmaxopen_right=1500*Ao_right*Ho_right**(1/2)*1000 !open controlled max HRR, W
+Qmax_right=Qmaxopen_right
+!Qmax_right=min(Qmaxfuel_right,Qmaxopen_right)    !max HRR
+t1_right=(Qmax_right/alpha_right)**(1/2)          !develop duration, s
+Q1_right=1/3*Qmax_right*t1_right                  !Heat cnsumed in developng stage, W
+t2_right=(0.7*qf_right*Af_right-Q1_right)/Qmax_right          !steady duration, s
+t3_right=0.6*qf_right*Af_right/Qmax_right        !decay duration,s
+*dim,HRR_right,table,3601,1,,time
+*do,i,1,3601
+HRR_right(i,0)=(i-1)*10
+*if,10*(i-1),le,t1_right,then
+HRR_right(i,1)=alpha_right*100*(i-1)*(i-1)
+*elseif,10*(i-1),le,t1_right+t2_right
+HRR_right(i,1)=Qmax_right
+*else
+HRR_right(i,1)=max(0,Qmax_right/t3_right*(t1_right+t2_right+t3_right-10*(i-1)))
+*endif
+*enddo
+----------------division of walls and floors--------------
+dw_right_front=100/1000                           !front wall thickness,m
+dw_right_back=100/1000                           !back wall thickness,m
+dw_right_left=100/1000                           !left wall thickness,m
+dw_right_right=100/1000                           !right wall thickness,m
+dwmin_right=min(dw_right_front,dw_right_back,dw_right_left,dw_right_right)
+numw_right_front=nint(dw_right_front/delta_gypsum)
+numw_right_back=nint(dw_right_back/delta_gypsum)
+numw_right_left=nint(dw_right_left/delta_gypsum)
+numw_right_right=nint(dw_right_right/delta_gypsum)
+df_right=200/1000                           !floor thickness, m
+num_right_floor=nint(df_right/delta_NWC)
+-------------steel members----------------------
+bs_right=400/1000                           !steel section H400*400*13*21
+hs_right=400/1000
+tf_right=21/1000
+tw_right=13/1000
+di_right=10/1000                            !insulation thickness, m
+numi_right=nint(di_right/delta_SFRM)
+ls_right=H_right                           !steel length, m
+Vs_right=ls_right*(2*bs_right*tf_right+(hs_right-2*tf_right)*tw_right)    !steel volume, m3
+As_right=ls_right*(2*hs_right+4*bs_right-2*tw_right)
+-------------convection factor at opening-----------
+!mp,hf,11,0.5*Ao_right*(Ho_right)**(1/2)*c_air/Ao_right     !effective covection factor considering heat loss by gas exchange at opening
+*do,i,1,25
+temps=50*(i-1)
+cp=0.187*(temps+273)+952
+mptemp,i,temps
+mpdata,hf,11,i,0.5*Ao_right*(Ho_right)**(1/2)*cp/Ao_right
+*enddo
+--------------top room --------------------
+--------------geometry------------------------
+W_top=10                                   !room width, m
+D_top=7                                    !room depth, m
+H_top=3.8                                  !room height, m
+Vr_top=W_top*D_top*H_top          !room volume, m3
+Af_top=W_top*D_top                   !floor area, m2
+Wo_top=6                                   !open width, m, front wall
+Ho_top=1.5                                 !open height, m, front wall
+Ao_top=Wo_top*Ho_top                 !open area, m2
+Aw_top_front=W_top*H_top-Ao_top        !front wall, m2
+Aw_top_back=W_top*H_top                  !back wall, m2
+Aw_top_left=D_top*H_top                  !left wall, m2
+Aw_top_right=D_top*H_top                  !right wall, m2
+At_top=Aw_top_front+Aw_top_back+Aw_top_left+Aw_top_right+2*Af_top         !total area not inclue open, m2
+emisr_top=1-exp(-1.1*H_top)             !gas emissivity
+--------------HRR----------------------------
+alpha_top=1000/300/300*1000                       !fire factor, W/s2
+qf_top=600e6                                      !fire load per unit floor area, J/m2
+qfuelmax_top=250e3                                !fuel controlled max HRRPUA, W/m2
+Qmaxfuel_top=qfuelmax_top*Af_top            !fuel controlled max HRR, W
+Qmaxopen_top=1500*Ao_top*Ho_top**(1/2)*1000 !open controlled max HRR, W
+Qmax_top=Qmaxopen_top
+!Qmax_top=min(Qmaxfuel_top,Qmaxopen_top)    !max HRR
+t1_top=(Qmax_top/alpha_top)**(1/2)          !develop duration, s
+Q1_top=1/3*Qmax_top*t1_top                  !Heat cnsumed in developng stage, W
+t2_top=(0.7*qf_top*Af_top-Q1_top)/Qmax_top          !steady duration, s
+t3_top=0.6*qf_top*Af_top/Qmax_top        !decay duration,s
+*dim,HRR_top,table,3601,1,,time
+*do,i,1,3601
+HRR_top(i,0)=(i-1)*10
+*if,10*(i-1),le,t1_top,then
+HRR_top(i,1)=alpha_top*100*(i-1)*(i-1)
+*elseif,10*(i-1),le,t1_top+t2_top
+HRR_top(i,1)=Qmax_top
+*else
+HRR_top(i,1)=max(0,Qmax_top/t3_top*(t1_top+t2_top+t3_top-10*(i-1)))
+*endif
+*enddo
+----------------division of walls and floors--------------
+dw_top_front=100/1000                           !front wall thickness,m
+dw_top_back=100/1000                           !back wall thickness,m
+dw_top_left=100/1000                           !left wall thickness,m
+dw_top_right=100/1000                           !right wall thickness,m
+dwmin_top=min(dw_top_front,dw_top_back,dw_top_left,dw_top_right)
+numw_top_front=nint(dw_top_front/delta_gypsum)
+numw_top_back=nint(dw_top_back/delta_gypsum)
+numw_top_left=nint(dw_top_left/delta_gypsum)
+numw_top_right=nint(dw_top_right/delta_gypsum)
+df_top=200/1000                           !floor thickness, m
+num_top_floor=nint(df_top/delta_NWC)
+-------------steel members----------------------
+bs_top=400/1000                           !steel section H400*400*13*21
+hs_top=400/1000
+tf_top=21/1000
+tw_top=13/1000
+di_top=10/1000                            !insulation thickness, m
+numi_top=nint(di_top/delta_SFRM)
+ls_top=H_top                           !steel length, m
+Vs_top=ls_top*(2*bs_top*tf_top+(hs_top-2*tf_top)*tw_top)    !steel volume, m3
+As_top=ls_top*(2*hs_top+4*bs_top-2*tw_top)
+-------------convection factor at opening-----------
+!mp,hf,12,0.5*Ao_top*(Ho_top)**(1/2)*c_air/Ao_top     !effective covection factor considering heat loss by gas exchange at opening
+*do,i,1,25
+temps=50*(i-1)
+cp=0.187*(temps+273)+952
+mptemp,i,temps
+mpdata,hf,12,i,0.5*Ao_top*(Ho_top)**(1/2)*cp/Ao_top
+*enddo
+--------------bottom room --------------------
+--------------geometry------------------------
+W_bottom=10                                   !room width, m
+D_bottom=7                                    !room depth, m
+H_bottom=3.8                                  !room height, m
+Vr_bottom=W_bottom*D_bottom*H_bottom          !room volume, m3
+Af_bottom=W_bottom*D_bottom                   !floor area, m2
+Wo_bottom=6                                   !open width, m, front wall
+Ho_bottom=1.5                                 !open height, m, front wall
+Ao_bottom=Wo_bottom*Ho_bottom                 !open area, m2
+Aw_bottom_front=W_bottom*H_bottom-Ao_bottom        !front wall, m2
+Aw_bottom_back=W_bottom*H_bottom                  !back wall, m2
+Aw_bottom_left=D_bottom*H_bottom                  !left wall, m2
+Aw_bottom_right=D_bottom*H_bottom                  !right wall, m2
+At_bottom=Aw_bottom_front+Aw_bottom_back+Aw_bottom_left+Aw_bottom_right+2*Af_bottom         !total area not inclue open, m2
+emisr_bottom=1-exp(-1.1*H_bottom)             !gas emissivity
+--------------HRR----------------------------
+alpha_bottom=1000/300/300*1000                       !fire factor, W/s2
+qf_bottom=600e6                                      !fire load per unit floor area, J/m2
+qfuelmax_bottom=250e3                                !fuel controlled max HRRPUA, W/m2
+Qmaxfuel_bottom=qfuelmax_bottom*Af_bottom            !fuel controlled max HRR, W
+Qmaxopen_bottom=1500*Ao_bottom*Ho_bottom**(1/2)*1000 !open controlled max HRR, W
+Qmax_bottom=Qmaxopen_bottom
+!Qmax_bottom=min(Qmaxfuel_bottom,Qmaxopen_bottom)    !max HRR
+t1_bottom=(Qmax_bottom/alpha_bottom)**(1/2)          !develop duration, s
+Q1_bottom=1/3*Qmax_bottom*t1_bottom                  !Heat cnsumed in developng stage, W
+t2_bottom=(0.7*qf_bottom*Af_bottom-Q1_bottom)/Qmax_bottom          !steady duration, s
+t3_bottom=0.6*qf_bottom*Af_bottom/Qmax_bottom        !decay duration,s
+*dim,HRR_bottom,table,3601,1,,time
+*do,i,1,3601
+HRR_bottom(i,0)=(i-1)*10
+*if,10*(i-1),le,t1_bottom,then
+HRR_bottom(i,1)=alpha_bottom*100*(i-1)*(i-1)
+*elseif,10*(i-1),le,t1_bottom+t2_bottom
+HRR_bottom(i,1)=Qmax_bottom
+*else
+HRR_bottom(i,1)=max(0,Qmax_bottom/t3_bottom*(t1_bottom+t2_bottom+t3_bottom-10*(i-1)))
+*endif
+*enddo
+----------------division of walls and floors--------------
+dw_bottom_front=100/1000                           !front wall thickness,m
+dw_bottom_back=100/1000                           !back wall thickness,m
+dw_bottom_left=100/1000                           !left wall thickness,m
+dw_bottom_right=100/1000                           !right wall thickness,m
+dwmin_bottom=min(dw_bottom_front,dw_bottom_back,dw_bottom_left,dw_bottom_right)
+numw_bottom_front=nint(dw_bottom_front/delta_gypsum)
+numw_bottom_back=nint(dw_bottom_back/delta_gypsum)
+numw_bottom_left=nint(dw_bottom_left/delta_gypsum)
+numw_bottom_right=nint(dw_bottom_right/delta_gypsum)
+df_bottom=200/1000                           !floor thickness, m
+num_bottom_floor=nint(df_bottom/delta_NWC)
+-------------steel members----------------------
+bs_bottom=400/1000                           !steel section H400*400*13*21
+hs_bottom=400/1000
+tf_bottom=21/1000
+tw_bottom=13/1000
+di_bottom=10/1000                            !insulation thickness, m
+numi_bottom=nint(di_bottom/delta_SFRM)
+ls_bottom=H_bottom                           !steel length, m
+Vs_bottom=ls_bottom*(2*bs_bottom*tf_bottom+(hs_bottom-2*tf_bottom)*tw_bottom)    !steel volume, m3
+As_bottom=ls_bottom*(2*hs_bottom+4*bs_bottom-2*tw_bottom)
+-------------convection factor at opening-----------
+!mp,hf,13,0.5*Ao_bottom*(Ho_bottom)**(1/2)*c_air/Ao_bottom     !effective covection factor considering heat loss by gas exchange at opening
+*do,i,1,25
+temps=50*(i-1)
+cp=0.187*(temps+273)+952
+mptemp,i,temps
+mpdata,hf,13,i,0.5*Ao_bottom*(Ho_bottom)**(1/2)*cp/Ao_bottom
+*enddo
+--------------front room --------------------
+--------------geometry------------------------
+W_front=10                                   !room width, m
+D_front=7                                    !room depth, m
+H_front=3.8                                  !room height, m
+Vr_front=W_front*D_front*H_front          !room volume, m3
+Af_front=W_front*D_front                   !floor area, m2
+Wo_front=6                                   !open width, m, front wall
+Ho_front=1.5                                 !open height, m, front wall
+Ao_front=Wo_front*Ho_front                 !open area, m2
+Aw_front_front=W_front*H_front-Ao_front        !front wall, m2
+Aw_front_back=W_front*H_front                  !back wall, m2
+Aw_front_left=D_front*H_front                  !left wall, m2
+Aw_front_right=D_front*H_front                  !right wall, m2
+At_front=Aw_front_front+Aw_front_back+Aw_front_left+Aw_front_right+2*Af_front         !total area not inclue open, m2
+emisr_front=1-exp(-1.1*H_front)             !gas emissivity
+--------------HRR----------------------------
+alpha_front=1000/300/300*1000                       !fire factor, W/s2
+qf_front=600e6                                      !fire load per unit floor area, J/m2
+qfuelmax_front=250e3                                !fuel controlled max HRRPUA, W/m2
+Qmaxfuel_front=qfuelmax_front*Af_front            !fuel controlled max HRR, W
+Qmaxopen_front=1500*Ao_front*Ho_front**(1/2)*1000 !open controlled max HRR, W
+Qmax_front=Qmaxopen_front
+!Qmax_front=min(Qmaxfuel_front,Qmaxopen_front)    !max HRR
+t1_front=(Qmax_front/alpha_front)**(1/2)          !develop duration, s
+Q1_front=1/3*Qmax_front*t1_front                  !Heat cnsumed in developng stage, W
+t2_front=(0.7*qf_front*Af_front-Q1_front)/Qmax_front          !steady duration, s
+t3_front=0.6*qf_front*Af_front/Qmax_front        !decay duration,s
+*dim,HRR_front,table,3601,1,,time
+*do,i,1,3601
+HRR_front(i,0)=(i-1)*10
+*if,10*(i-1),le,t1_front,then
+HRR_front(i,1)=alpha_front*100*(i-1)*(i-1)
+*elseif,10*(i-1),le,t1_front+t2_front
+HRR_front(i,1)=Qmax_front
+*else
+HRR_front(i,1)=max(0,Qmax_front/t3_front*(t1_front+t2_front+t3_front-10*(i-1)))
+*endif
+*enddo
+----------------division of walls and floors--------------
+dw_front_front=100/1000                           !front wall thickness,m
+dw_front_back=100/1000                           !back wall thickness,m
+dw_front_left=100/1000                           !left wall thickness,m
+dw_front_right=100/1000                           !right wall thickness,m
+dwmin_front=min(dw_front_front,dw_front_back,dw_front_left,dw_front_right)
+numw_front_front=nint(dw_front_front/delta_gypsum)
+numw_front_back=nint(dw_front_back/delta_gypsum)
+numw_front_left=nint(dw_front_left/delta_gypsum)
+numw_front_right=nint(dw_front_right/delta_gypsum)
+df_front=200/1000                           !floor thickness, m
+num_front_floor=nint(df_front/delta_NWC)
+-------------steel members----------------------
+bs_front=400/1000                           !steel section H400*400*13*21
+hs_front=400/1000
+tf_front=21/1000
+tw_front=13/1000
+di_front=10/1000                            !insulation thickness, m
+numi_front=nint(di_front/delta_SFRM)
+ls_front=H_front                           !steel length, m
+Vs_front=ls_front*(2*bs_front*tf_front+(hs_front-2*tf_front)*tw_front)    !steel volume, m3
+As_front=ls_front*(2*hs_front+4*bs_front-2*tw_front)
+-------------convection factor at opening-----------
+!mp,hf,14,0.5*Ao_front*(Ho_front)**(1/2)*c_air/Ao_front     !effective covection factor considering heat loss by gas exchange at opening
+*do,i,1,25
+temps=50*(i-1)
+cp=0.187*(temps+273)+952
+mptemp,i,temps
+mpdata,hf,14,i,0.5*Ao_front*(Ho_front)**(1/2)*cp/Ao_front
+*enddo
+--------------back room --------------------
+--------------geometry------------------------
+W_back=10                                   !room width, m
+D_back=7                                    !room depth, m
+H_back=3.8                                  !room height, m
+Vr_back=W_back*D_back*H_back          !room volume, m3
+Af_back=W_back*D_back                   !floor area, m2
+Wo_back=6                                   !open width, m, front wall
+Ho_back=1.5                                 !open height, m, front wall
+Ao_back=Wo_back*Ho_back                 !open area, m2
+Aw_back_front=W_back*H_back-Ao_back        !front wall, m2
+Aw_back_back=W_back*H_back                  !back wall, m2
+Aw_back_left=D_back*H_back                  !left wall, m2
+Aw_back_right=D_back*H_back                  !right wall, m2
+At_back=Aw_back_front+Aw_back_back+Aw_back_left+Aw_back_right+2*Af_back         !total area not inclue open, m2
+emisr_back=1-exp(-1.1*H_back)             !gas emissivity
+--------------HRR----------------------------
+alpha_back=1000/300/300*1000                       !fire factor, W/s2
+qf_back=600e6                                      !fire load per unit floor area, J/m2
+qfuelmax_back=250e3                                !fuel controlled max HRRPUA, W/m2
+Qmaxfuel_back=qfuelmax_back*Af_back            !fuel controlled max HRR, W
+Qmaxopen_back=1500*Ao_back*Ho_back**(1/2)*1000 !open controlled max HRR, W
+Qmax_back=Qmaxopen_back
+!Qmax_back=min(Qmaxfuel_back,Qmaxopen_back)    !max HRR
+t1_back=(Qmax_back/alpha_back)**(1/2)          !develop duration, s
+Q1_back=1/3*Qmax_back*t1_back                  !Heat cnsumed in developng stage, W
+t2_back=(0.7*qf_back*Af_back-Q1_back)/Qmax_back          !steady duration, s
+t3_back=0.6*qf_back*Af_back/Qmax_back        !decay duration,s
+*dim,HRR_back,table,3601,1,,time
+*do,i,1,3601
+HRR_back(i,0)=(i-1)*10
+*if,10*(i-1),le,t1_back,then
+HRR_back(i,1)=alpha_back*100*(i-1)*(i-1)
+*elseif,10*(i-1),le,t1_back+t2_back
+HRR_back(i,1)=Qmax_back
+*else
+HRR_back(i,1)=max(0,Qmax_back/t3_back*(t1_back+t2_back+t3_back-10*(i-1)))
+*endif
+*enddo
+----------------division of walls and floors--------------
+dw_back_front=100/1000                           !front wall thickness,m
+dw_back_back=100/1000                           !back wall thickness,m
+dw_back_left=100/1000                           !left wall thickness,m
+dw_back_right=100/1000                           !right wall thickness,m
+dwmin_back=min(dw_back_front,dw_back_back,dw_back_left,dw_back_right)
+numw_back_front=nint(dw_back_front/delta_gypsum)
+numw_back_back=nint(dw_back_back/delta_gypsum)
+numw_back_left=nint(dw_back_left/delta_gypsum)
+numw_back_right=nint(dw_back_right/delta_gypsum)
+df_back=200/1000                           !floor thickness, m
+num_back_floor=nint(df_back/delta_NWC)
+-------------steel members----------------------
+bs_back=400/1000                           !steel section H400*400*13*21
+hs_back=400/1000
+tf_back=21/1000
+tw_back=13/1000
+di_back=10/1000                            !insulation thickness, m
+numi_back=nint(di_back/delta_SFRM)
+ls_back=H_back                           !steel length, m
+Vs_back=ls_back*(2*bs_back*tf_back+(hs_back-2*tf_back)*tw_back)    !steel volume, m3
+As_back=ls_back*(2*hs_back+4*bs_back-2*tw_back)
+-------------convection factor at opening-----------
+!mp,hf,15,0.5*Ao_back*(Ho_back)**(1/2)*c_air/Ao_back     !effective covection factor considering heat loss by gas exchange at opening
+*do,i,1,25
+temps=50*(i-1)
+cp=0.187*(temps+273)+952
+mptemp,i,temps
+mpdata,hf,15,i,0.5*Ao_back*(Ho_back)**(1/2)*cp/Ao_back
+*enddo
+--------------------------------------------------------
+-------------emissivity at fire exposed surface---------
+mp,emis,16,emisr_center*emis_gypsum
+mp,emis,17,emisr_center*emis_NWC
+mp,emis,18,emisr_left*emis_gypsum
+mp,emis,19,emisr_left*emis_NWC
+mp,emis,20,emisr_right*emis_gypsum
+mp,emis,21,emisr_right*emis_NWC
+mp,emis,22,emisr_top*emis_gypsum
+mp,emis,23,emisr_top*emis_NWC
+mp,emis,24,emisr_bottom*emis_gypsum
+mp,emis,25,emisr_bottom*emis_NWC
+mp,emis,26,emisr_front*emis_gypsum
+mp,emis,27,emisr_front*emis_NWC
+mp,emis,28,emisr_back*emis_gypsum
+mp,emis,29,emisr_back*emis_NWC
+mp,emis,30,emisr_center
+mp,emis,31,emisr_front
+mp,emis,32,emisr_back
+mp,emis,33,emisr_left
+mp,emis,34,emisr_right
+mp,emis,35,emisr_top
+mp,emis,36,emisr_bottom
 ------------real constants-----------------------
-r,1,Vr_center              !mass71, gas volume
-r,2,Vs_center              !mass71, steel volume
-r,3,Aw_center_front             !front wall
-r,4,Aw_center_back             !back wall
-r,5,Aw_center_left             !left wall
-r,6,Aw_center_right             !right wall
-r,7,Af_center              !floor slab
-r,8,Ao_center              !opening
-r,9,As_center              !steel                  
+r,1,Vr_center                   !mass71, gas center room
+r,2,Vr_left                     !mass71, gas left room
+r,3,Vr_right                    !mass71, gas right room
+r,4,Vr_top                      !mass71, gas top room
+r,5,Vr_bottom                   !mass71, gas bottom room
+r,6,Vr_front                    !mass71, gas front room
+r,7,Vr_back                     !mass71, gas back room
+
+r,8,Vs_center                   !mass71, steel center room
+r,9,Vs_left                     !mass71, steel left room
+r,10,Vs_right                   !mass71, steel right room
+r,11,Vs_top                     !mass71, steel top room
+r,12,Vs_bottom                  !mass71, steel bottom room
+r,13,Vs_front                   !mass71, steel front room
+r,14,Vs_back                    !mass71, steel back room
+
+r,15,Aw_center_front                                    !front wall, link32, conduction
+r,16,Aw_center_back                                     !back wall, link32, conduction
+r,17,Aw_center_left                                     !left wall, link32, conduction
+r,18,Aw_center_right                                    !right wall, link32, conduction
+r,19,Af_center                                          !floor, link32, conduction
+r,20,Ao_center                                          !opening
+r,21,As_center                                          !steel                  
+
+dspace=delta_gypsum/2           !arbitrary distance 
+
+k,1,0,0,0                       !point for center room
+
+k,2,-dspace,0,0
+k,3,-dspace-dw_center_left,0,0
+k,4,-dspace-dw_center_left-dspace,0,0     !point for left room
+
+k,5,dspace,0,0
+k,6,dspace+dw_center_right,0,0
+k,7,dspace+dw_center_right+dspace,0,0     !point for right room
+
+k,8,0,dspace,0
+k,9,0,dspace+df_center,0
+k,10,0,dspace+df_center+dspace,0          !point for top room
+
+k,11,0,-dspace,0
+k,12,0,-dspace-df_center,0
+k,13,0,-dspace-df_center-dspace,0         !point for bottom room
+
+k,14,0,0,dspace
+k,15,0,0,dspace+dw_center_front
+k,16,0,0,dspace+dw_center_front+dspace,0  !point for front room
+
+k,17,0,0,-dspace
+k,18,0,0,-dspace-dw_center_back
+k,19,0,0,-dspace-dw_center_back-dspace,0  !point for back room
+
+-------model gas volumes-------------------------------
+type,71
+mat,6
+real,1
+kmesh,1                       !gas center room
+real,2
+kmesh,4                       !gas left room
+real,3
+kmesh,7                       !gas right room
+real,4
+kmesh,10                      !gas top room
+real,5
+kmesh,13                      !bottom room
+real,6
+kmesh,16                      !front room
+real,7
+kmesh,19                      !back room
+-------------------------------------------------------                        
+-------model walls and floors--------------------------
+-------------------------------------------------------
+l,2,3,numw_center_left        !center left wall
+type,32
+mat,1
+real,17
+lmesh,1                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(-dspace,0,0)
+nodeNo3=node(-dspace-dw_center_left,0,0)
+nodeNo4=node(-dspace-dw_center_left-dspace,0,0)
+type,31
+mat,16
+e,nodeNo1,nodeNo2
+mat,1
+e,nodeNo3,nodeNo4                       
+type,34
+mat,7
+e,nodeNo1,nodeNo2 
+mat,8                            
+e,nodeNo3,nodeNo4
+
+l,5,6,numw_center_right       !center right wall
+type,32
+mat,1
+real,18
+lmesh,2                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(dspace,0,0)
+nodeNo3=node(dspace+dw_center_right,0,0)
+nodeNo4=node(dspace+dw_center_right+dspace,0,0)
+type,31
+mat,16
+e,nodeNo1,nodeNo2
+mat,1
+e,nodeNo3,nodeNo4                      
+type,34
+mat,7
+e,nodeNo1,nodeNo2
+mat,8                            
+e,nodeNo3,nodeNo4              
+
+l,8,9,num_center_floor        !center top floor
+type,32
+mat,2
+real,19
+lmesh,3                                        
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,dspace,0)
+nodeNo3=node(0,dspace+df_center,0)
+nodeNo4=node(0,dspace+df_center+dspace,0)
+type,31
+mat,17
+e,nodeNo1,nodeNo2
+mat,2
+e,nodeNo3,nodeNo4                      
+type,34
+mat,7
+e,nodeNo1,nodeNo2
+mat,8                            
+e,nodeNo3,nodeNo4             
+
+l,11,12,num_center_floor      !center bottom floor
+type,32
+mat,2
+real,19
+lmesh,4                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,-dspace,0)
+nodeNo3=node(0,-dspace-df_center,0)
+nodeNo4=node(0,-dspace-df_center-dspace,0)
+type,31
+mat,17
+e,nodeNo1,nodeNo2
+mat,2
+e,nodeNo3,nodeNo4                        
+type,34
+mat,7
+e,nodeNo1,nodeNo2
+mat,8                            
+e,nodeNo3,nodeNo4              
+
+l,14,15,numw_center_front      !center front wall
+type,32
+mat,1
+real,15
+lmesh,5                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,0,dspace)
+nodeNo3=node(0,0,dspace+dw_center_front)
+nodeNo4=node(0,0,dspace+dw_center_front+dspace)
+type,31
+mat,16
+e,nodeNo1,nodeNo2
+mat,1
+e,nodeNo3,nodeNo4                       
+type,34
+mat,7
+e,nodeNo1,nodeNo2
+mat,8                            
+e,nodeNo3,nodeNo4
+
+l,17,18,numw_center_back      !center back wall
+type,32
+mat,1
+real,16
+lmesh,6                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,0,-dspace)
+nodeNo3=node(0,0,-dspace-dw_center_back)
+nodeNo4=node(0,0,-dspace-dw_center_back-dspace)
+type,31
+mat,16
+e,nodeNo1,nodeNo2
+mat,1
+e,nodeNo3,nodeNo4                       
+type,34
+mat,7
+e,nodeNo1,nodeNo2
+mat,8                            
+e,nodeNo3,nodeNo4
+-------------------------------------------------------                        
+-------model openings--------------------------
+-------------------------------------------------------
+*get,nodemax,node,,count
+n,nodemax+1,-dspace,-dspace,-dspace
+nodeNo1=node(0,0,0)
+nodeNo5=node(-dspace,-dspace,-dspace)
+type,31
+mat,30
+real,20
+e,nodeNo1,nodeNo5
+type,34
+mat,9
+e,nodeNo1,nodeNo5
+
+
+r,15,Aw_center_front                                    !front wall, link32, conduction
+r,16,Aw_center_back                                     !back wall, link32, conduction
+r,17,Aw_center_left                                     !left wall, link32, conduction
+r,18,Aw_center_right                                    !right wall, link32, conduction
+r,19,Af_center                                          !floor, link32, conduction
+r,20,Ao_center                                          !opening
+r,21,As_center                                          !steel 
+
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,0,-dspace)
+nodeNo3=node(0,0,-dspace-dw_center_front)
+nodeNo4=node(0,0,-dspace-dw_center_front-dspace)
+
+
+lmesh,1
+type,34
+real,11
+mat,7                           !fire exposed surface
+e,1,2
+
+l,2,3,numw_center_left
+l,3,4,1
+type,31
+real,
+
+type,32
+real,3
+mat,1
+lmesh,2
+
+
+
+
 
 ---------model gas volume----------
 n,1,0,0,0                      !center room gas volume node
