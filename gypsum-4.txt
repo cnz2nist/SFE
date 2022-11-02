@@ -1,3 +1,5 @@
+fini
+/clear
 /config,nres,10000000
 /config,nproc,2
 /prep7
@@ -6,7 +8,7 @@ stef=5.67e-8      !Stefan-Boltzman constant, J/(sm2K4)
 hc_fire=35        !film coefficient at fire exposed surface, W/m2K
 hc_air=9          !film coefficient at air exposed surface, W/m2K
 -------------numerical factor-------------------
-M=4               !factor controlling numerical accuracy,M=dx*dx/alpha/dt
+M=40               !factor controlling numerical accuracy,M=dx*dx/alpha/dt
 --------------material properties---------------
 --------------gypsum board, Buchanan------------
 rho_gypsum=800                            !density, kg/m3
@@ -39,7 +41,7 @@ rho_air=1.2
 c_air=1000           
 k_air=0.023 
 ------------element types-----------------------
-et,32,link32                !conduction bar
+et,33,link33                !conduction bar
 et,31,link31                !radiation bar
 et,34,link34                !convection bar
 et,71,mass71,,,0            !lumped mass
@@ -591,15 +593,17 @@ r,12,Vs_bottom                  !mass71, steel bottom room
 r,13,Vs_front                   !mass71, steel front room
 r,14,Vs_back                    !mass71, steel back room
 
-r,15,Aw_center_front                                    !front wall, link32, conduction
-r,16,Aw_center_back                                     !back wall, link32, conduction
-r,17,Aw_center_left                                     !left wall, link32, conduction
-r,18,Aw_center_right                                    !right wall, link32, conduction
-r,19,Af_center                                          !floor, link32, conduction
+r,15,Aw_center_front                                    !front wall, link33, conduction
+r,16,Aw_center_back                                     !back wall, link33, conduction
+r,17,Aw_center_left                                     !left wall, link33, conduction
+r,18,Aw_center_right                                    !right wall, link33, conduction
+r,19,Af_center                                          !floor, link33, conduction
 r,20,Ao_center                                          !opening
 r,21,As_center                                          !steel                  
 
-dspace=delta_gypsum/2           !arbitrary distance 
+dspace=df_center/5              !arbitrary distance
+
+r,22,1/dspace/3**0.5            !link33, HRR 
 
 k,1,0,0,0                       !point for center room
 
@@ -621,11 +625,11 @@ k,13,0,-dspace-df_center-dspace,0         !point for bottom room
 
 k,14,0,0,dspace
 k,15,0,0,dspace+dw_center_front
-k,16,0,0,dspace+dw_center_front+dspace,0  !point for front room
+k,16,0,0,dspace+dw_center_front+dspace    !point for front room
 
 k,17,0,0,-dspace
 k,18,0,0,-dspace-dw_center_back
-k,19,0,0,-dspace-dw_center_back-dspace,0  !point for back room
+k,19,0,0,-dspace-dw_center_back-dspace    !point for back room
 
 -------model gas volumes-------------------------------
 type,71
@@ -648,7 +652,7 @@ kmesh,19                      !back room
 -------model walls and floors--------------------------
 -------------------------------------------------------
 l,2,3,numw_center_left        !center left wall
-type,32
+type,33
 mat,1
 real,17
 lmesh,1                                          
@@ -668,7 +672,7 @@ mat,8
 e,nodeNo3,nodeNo4
 
 l,5,6,numw_center_right       !center right wall
-type,32
+type,33
 mat,1
 real,18
 lmesh,2                                          
@@ -688,7 +692,7 @@ mat,8
 e,nodeNo3,nodeNo4              
 
 l,8,9,num_center_floor        !center top floor
-type,32
+type,33
 mat,2
 real,19
 lmesh,3                                        
@@ -708,7 +712,7 @@ mat,8
 e,nodeNo3,nodeNo4             
 
 l,11,12,num_center_floor      !center bottom floor
-type,32
+type,33
 mat,2
 real,19
 lmesh,4                                          
@@ -725,10 +729,10 @@ type,34
 mat,7
 e,nodeNo1,nodeNo2
 mat,8                            
-e,nodeNo3,nodeNo4              
+e,nodeNo3,nodeNo4
 
 l,14,15,numw_center_front      !center front wall
-type,32
+type,33
 mat,1
 real,15
 lmesh,5                                          
@@ -748,7 +752,7 @@ mat,8
 e,nodeNo3,nodeNo4
 
 l,17,18,numw_center_back      !center back wall
-type,32
+type,33
 mat,1
 real,16
 lmesh,6                                          
@@ -766,8 +770,8 @@ mat,7
 e,nodeNo1,nodeNo2
 mat,8                            
 e,nodeNo3,nodeNo4
--------------------------------------------------------                        
--------model openings--------------------------
+
+-------------------------------------------------------                       -------model openings--------------------------
 -------------------------------------------------------
 *get,nodemax,node,,count
 n,nodemax+1,-dspace,-dspace,-dspace
@@ -780,198 +784,28 @@ e,nodeNo1,nodeNo5
 type,34
 mat,9
 e,nodeNo1,nodeNo5
-
-
-r,15,Aw_center_front                                    !front wall, link32, conduction
-r,16,Aw_center_back                                     !back wall, link32, conduction
-r,17,Aw_center_left                                     !left wall, link32, conduction
-r,18,Aw_center_right                                    !right wall, link32, conduction
-r,19,Af_center                                          !floor, link32, conduction
-r,20,Ao_center                                          !opening
-r,21,As_center                                          !steel 
-
-nodeNo1=node(0,0,0)
-nodeNo2=node(0,0,-dspace)
-nodeNo3=node(0,0,-dspace-dw_center_front)
-nodeNo4=node(0,0,-dspace-dw_center_front-dspace)
-
-
-lmesh,1
-type,34
-real,11
-mat,7                           !fire exposed surface
-e,1,2
-
-l,2,3,numw_center_left
-l,3,4,1
-type,31
-real,
-
-type,32
-real,3
-mat,1
-lmesh,2
-
-
-
-
-
----------model gas volume----------
-n,1,0,0,0                      !center room gas volume node
-*do,i,2,numw_center_front+2    !front wall nodes          
-n,i,0,0,delta_gypsum+dw_center_front/numw_center_front*(i-2)
-*enddo
-n,,0,0,delta_gypsum+dw_center_front+delta_gypsum    
-
-*get,nummax,node,,count
-*do,i,nummax+1,numw_center_back+nummax+1      !back wall nodes          
-n,i,0,0,-delta_gypsum-dw_center_back/numw_center_back*(i-nummax-1)
-*enddo
-n,,0,0,-delta_gypsum-dw_center_back-delta_gypsum
-
-*get,nummax,node,,count
-*do,i,nummax+1,numw_center_left+nummax+1      !left wall nodes          
-n,i,delta_gypsum+dw_center_left/numw_center_left*(i-nummax-1),0,0
-*enddo
-n,,delta_gypsum+dw_center_left+delta_gypsum,0,0
-
-*get,nummax,node,,count
-*do,i,nummax+1,numw_center_right+nummax+1      !right wall nodes          
-n,i,-delta_gypsum-dw_center_right/numw_center_right*(i-nummax-1),0,0
-*enddo
-n,,-delta_gypsum-dw_center_right+delta_gypsum,0,0
-
-*get,nummax,node,,count
-*do,i,nummax+1,num_center_floor+nummax+1      !top floor nodes          
-n,i,0,delta_gypsum+df_center/num_center_floor*(i-nummax-1),0
-*enddo
-n,,0,delta_gypsum+df_center+delta_gypsum,0
-
-*get,nummax,node,,count
-*do,i,nummax+1,num_center_floor+nummax+1      !bottom floor nodes          
-n,i,0,-delta_gypsum-df_center/num_center_floor*(i-nummax-1),0
-*enddo
-n,,0,-delta_gypsum-df_center+delta_gypsum,0
-
-type,4
-mat,6
-real,1
-node_center=node(0,0,0)
-e,node_center                      !center gas volume mass
-
-real,1
-node_center=node(0,0,0)
-e,node_center                      !center gas volume mass
-
-type,1
-mat,1
-real,3
-*do,i,2,numw_center_front+1
-e,i,i+1                  !front wall
-*enddo
-
-
-
-numw_center_front
-
-
-k,2,dw,0
-l,1,2,numw
-type,1
-mat,1
-real,1
-lmesh,1
-
-
-r,1,At                     !link32, wall conduction
-r,2,At,1,emisr*emisw,stef  !link31, fire exposed
-r,3,Ao,1,emisr,stef        !link31, open radiation
-r,4,At                     !link34, wall convection
-r,5,Ao                     !link34, open convection
-r,6,Vr-4*Vs                     !mass71,air
-r,7,4*Vs                     !mass71,steel
-r,8,1/0.5/deltaw           !link32, HRR
-r,9,4*Ai,1,emisr*emiss,stef  !link31
-r,10,4*Ai                    !link34
-r,11,At,1,emisw,stef       !link31, wall radiation to air
-r,12,4*As                    !link32
-
----------model wall----------
-k,1,0,0
-k,2,dw,0
-l,1,2,numw
-type,1
-mat,1
-real,1
-lmesh,1
---------BC at air exposed-----
-n,numw+2,dw+deltaw,0
-type,2
-real,11
-e,numw+1,numw+2
-type,3
-real,4
-mat,6
-e,numw+1,numw+2
---------BC at fire exposed-----
-n,numw+3,-deltaw,0
-type,2
-real,2
-e,numw+3,1
-type,3
-real,4
+--------------------------------------------------------
+------model HRR--------------------------------
+--------------------------------------------------------
+n,nodemax+2,dspace,-dspace,-dspace
+nodeNo6=node(dspace,-dspace,-dspace)
+type,33
 mat,5
-e,numw+3,1
---------BC at opening----------
-type,2
-real,3
-n,numw+4,-deltaw,-deltaw
-e,numw+3,numw+4
-type,3
-mat,7
-real,5
-e,numw+3,numw+4
---------heat flux to steel----------
-k,numw+5,-deltaw,deltaw
-k,numw+numi,-deltaw,deltaw+di
-l,numw+5,numw+numi,numi-1
-type,1
-real,12
-mat,8
-lmesh,2
-real,9
-e,numw+3,numw+5
-type,3
-real,10
-mat,5
-e,numw+3,numw+5
--------lumped mass-------------
-type,4
-mat,2
-real,6
-e,numw+3
-mat,3
-real,7
-e,numw+6
---------HRR-------------------
-n,numw+6+numi,-1.5*deltaw,0
-type,1
-mat,4
-real,8
-e,numw+6+numi,numw+3
+real,22
+e,nodeNo1,nodeNo6
 ---------load------------------------
+stefan,5.67e-8
 toffset,273
 tunif,20
-esel,s,mat,,4
-bfe,all,hgen,,%HRR%
-d,numw+2,temp,20
-d,numw+4,temp,20
+esel,s,mat,,5
+bfe,all,hgen,,%HRR_center%
+d,nodeNo5,temp,20
 allsel
 /solu
 antype,4
 autots,on
 deltim,10,0.1,100
-time,12000
+time,1800
 outres,all,all
 allsel
 solve
