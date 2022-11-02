@@ -11,12 +11,9 @@ hc_air=9          !film coefficient at air exposed surface, W/m2K
 M=4               !factor controlling numerical accuracy,M=dx*dx/alpha/dt
 --------------material properties---------------
 --------------gypsum board, Buchanan------------
-!rho_gypsum=800                            !density, kg/m3
-!c_gypsum=1700                             !sepcfic heat, J/(kgK)
-!k_gypsum=0.2                              !conductivity, W/mK
-rho_gypsum=2300                            !density, kg/m3
-c_gypsum=1000                             !sepcfic heat, J/(kgK)
-k_gypsum=1.6                              !conductivity, W/mK
+rho_gypsum=800                            !density, kg/m3
+c_gypsum=1700                             !sepcfic heat, J/(kgK)
+k_gypsum=0.2                              !conductivity, W/mK
 emis_gypsum=0.8                           !emissivity
 alpha_gypsum=k_gypsum/rho_gypsum/c_gypsum !diffusivity
 delta_gypsum=(M*alpha_gypsum*10)**(1/2)   !mesh size
@@ -113,10 +110,10 @@ HRR_center(i,1)=max(0,Qmax_center/t3_center*(t1_center+t2_center+t3_center-10*(i
 *endif
 *enddo
 ----------------division of walls and floors--------------
-dw_center_front=200/1000                           !front wall thickness,m
-dw_center_back=200/1000                           !back wall thickness,m
-dw_center_left=200/1000                           !left wall thickness,m
-dw_center_right=200/1000                           !right wall thickness,m
+dw_center_front=100/1000                           !front wall thickness,m
+dw_center_back=100/1000                           !back wall thickness,m
+dw_center_left=100/1000                           !left wall thickness,m
+dw_center_right=100/1000                           !right wall thickness,m
 numw_center_front=nint(dw_center_front/delta_gypsum)
 numw_center_back=nint(dw_center_back/delta_gypsum)
 numw_center_left=nint(dw_center_left/delta_gypsum)
@@ -181,10 +178,10 @@ HRR_left(i,1)=max(0,Qmax_left/t3_left*(t1_left+t2_left+t3_left-10*(i-1)))
 *endif
 *enddo
 ----------------division of walls and floors--------------
-dw_left_front=200/1000                           !front wall thickness,m
-dw_left_back=200/1000                           !back wall thickness,m
-dw_left_left=200/1000                           !left wall thickness,m
-dw_left_right=200/1000                           !right wall thickness,m
+dw_left_front=100/1000                           !front wall thickness,m
+dw_left_back=100/1000                           !back wall thickness,m
+dw_left_left=100/1000                           !left wall thickness,m
+dw_left_right=100/1000                           !right wall thickness,m
 numw_left_front=nint(dw_left_front/delta_gypsum)
 numw_left_back=nint(dw_left_back/delta_gypsum)
 numw_left_left=nint(dw_left_left/delta_gypsum)
@@ -249,10 +246,10 @@ HRR_right(i,1)=max(0,Qmax_right/t3_right*(t1_right+t2_right+t3_right-10*(i-1)))
 *endif
 *enddo
 ----------------division of walls and floors--------------
-dw_right_front=200/1000                           !front wall thickness,m
-dw_right_back=200/1000                           !back wall thickness,m
-dw_right_left=200/1000                           !left wall thickness,m
-dw_right_right=200/1000                           !right wall thickness,m
+dw_right_front=100/1000                           !front wall thickness,m
+dw_right_back=100/1000                           !back wall thickness,m
+dw_right_left=100/1000                           !left wall thickness,m
+dw_right_right=100/1000                           !right wall thickness,m
 numw_right_front=nint(dw_right_front/delta_gypsum)
 numw_right_back=nint(dw_right_back/delta_gypsum)
 numw_right_left=nint(dw_right_left/delta_gypsum)
@@ -317,10 +314,10 @@ HRR_top(i,1)=max(0,Qmax_top/t3_top*(t1_top+t2_top+t3_top-10*(i-1)))
 *endif
 *enddo
 ----------------division of walls and floors--------------
-dw_top_front=200/1000                           !front wall thickness,m
-dw_top_back=200/1000                           !back wall thickness,m
-dw_top_left=200/1000                           !left wall thickness,m
-dw_top_right=200/1000                           !right wall thickness,m
+dw_top_front=100/1000                           !front wall thickness,m
+dw_top_back=100/1000                           !back wall thickness,m
+dw_top_left=100/1000                           !left wall thickness,m
+dw_top_right=100/1000                           !right wall thickness,m
 numw_top_front=nint(dw_top_front/delta_gypsum)
 numw_top_back=nint(dw_top_back/delta_gypsum)
 numw_top_left=nint(dw_top_left/delta_gypsum)
@@ -385,10 +382,10 @@ HRR_bottom(i,1)=max(0,Qmax_bottom/t3_bottom*(t1_bottom+t2_bottom+t3_bottom-10*(i
 *endif
 *enddo
 ----------------division of walls and floors--------------
-dw_bottom_front=200/1000                           !front wall thickness,m
-dw_bottom_back=200/1000                           !back wall thickness,m
-dw_bottom_left=200/1000                           !left wall thickness,m
-dw_bottom_right=200/1000                           !right wall thickness,m
+dw_bottom_front=100/1000                           !front wall thickness,m
+dw_bottom_back=100/1000                           !back wall thickness,m
+dw_bottom_left=100/1000                           !left wall thickness,m
+dw_bottom_right=100/1000                           !right wall thickness,m
 numw_bottom_front=nint(dw_bottom_front/delta_gypsum)
 numw_bottom_back=nint(dw_bottom_back/delta_gypsum)
 numw_bottom_left=nint(dw_bottom_left/delta_gypsum)
@@ -453,10 +450,10 @@ HRR_front(i,1)=max(0,Qmax_front/t3_front*(t1_front+t2_front+t3_front-10*(i-1)))
 *endif
 *enddo
 ----------------division of walls and floors--------------
-dw_front_front=200/1000                           !front wall thickness,m
-dw_front_back=200/1000                           !back wall thickness,m
-dw_front_left=200/1000                           !left wall thickness,m
-dw_front_right=200/1000                           !right wall thickness,m
+dw_front_front=100/1000                           !front wall thickness,m
+dw_front_back=100/1000                           !back wall thickness,m
+dw_front_left=100/1000                           !left wall thickness,m
+dw_front_right=100/1000                           !right wall thickness,m
 numw_front_front=nint(dw_front_front/delta_gypsum)
 numw_front_back=nint(dw_front_back/delta_gypsum)
 numw_front_left=nint(dw_front_left/delta_gypsum)
@@ -521,10 +518,10 @@ HRR_back(i,1)=max(0,Qmax_back/t3_back*(t1_back+t2_back+t3_back-10*(i-1)))
 *endif
 *enddo
 ----------------division of walls and floors--------------
-dw_back_front=200/1000                           !front wall thickness,m
-dw_back_back=200/1000                           !back wall thickness,m
-dw_back_left=200/1000                           !left wall thickness,m
-dw_back_right=200/1000                           !right wall thickness,m
+dw_back_front=100/1000                           !front wall thickness,m
+dw_back_back=100/1000                           !back wall thickness,m
+dw_back_left=100/1000                           !left wall thickness,m
+dw_back_right=100/1000                           !right wall thickness,m
 numw_back_front=nint(dw_back_front/delta_gypsum)
 numw_back_back=nint(dw_back_back/delta_gypsum)
 numw_back_left=nint(dw_back_left/delta_gypsum)
