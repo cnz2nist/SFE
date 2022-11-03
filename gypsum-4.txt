@@ -483,15 +483,15 @@ mpdata,hf,14,i,0.5*Ao_front*(Ho_front)**(1/2)*cp/Ao_front
 W_back=10                                   !room width, m
 D_back=7                                    !room depth, m
 H_back=3.8                                  !room height, m
-Vr_back=W_back*D_back*H_back          !room volume, m3
-Af_back=W_back*D_back                   !floor area, m2
+Vr_back=W_back*D_back*H_back                !room volume, m3
+Af_back=W_back*D_back                       !floor area, m2
 Wo_back=6                                   !open width, m, front wall
 Ho_back=1.5                                 !open height, m, front wall
-Ao_back=Wo_back*Ho_back                 !open area, m2
-Aw_back_front=W_back*H_back-Ao_back        !front wall, m2
+Ao_back=Wo_back*Ho_back                     !open area, m2
+Aw_back_front=W_back*H_back-Ao_back         !front wall, m2
 Aw_back_back=W_back*H_back                  !back wall, m2
 Aw_back_left=D_back*H_back                  !left wall, m2
-Aw_back_right=D_back*H_back                  !right wall, m2
+Aw_back_right=D_back*H_back                 !right wall, m2
 At_back=Aw_back_front+Aw_back_back+Aw_back_left+Aw_back_right+2*Af_back         !total area not inclue open, m2
 emisr_back=1-exp(-1.1*H_back)             !gas emissivity
 --------------HRR----------------------------
@@ -572,284 +572,1301 @@ mp,emis,36,emisr_bottom
 mp,emis,37,emis_gypsum
 mp,emis,38,emis_NWC
 
-
+-------------------------------------------------
 ------------real constants-----------------------
-r,1,Vr_center                   !mass71, gas center room
-r,2,Vr_front                    !mass71, gas front room
-r,3,Vr_back                     !mass71, gas back room
-r,4,Vr_left                     !mass71, gas left room
-r,5,Vr_right                    !mass71, gas right room
-r,6,Vr_top                      !mass71, gas top room
-r,7,Vr_bottom                   !mass71, gas bottom room
-
-!r,8,Vs_center                   !mass71, steel center room
-!r,9,Vs_left                     !mass71, steel left room
-!r,10,Vs_right                   !mass71, steel right room
-!r,11,Vs_top                     !mass71, steel top room
-!r,12,Vs_bottom                  !mass71, steel bottom room
-!r,13,Vs_front                   !mass71, steel front room
-!r,14,Vs_back                    !mass71, steel back room
-
-r,15,Aw_center_front                                    !front wall, link33, conduction
-r,16,Aw_center_back                                     !back wall, link33, conduction
-r,17,Aw_center_left                                     !left wall, link33, conduction
-r,18,Aw_center_right                                    !right wall, link33, conduction
-r,19,Af_center                                          !floor, link33, conduction
-r,20,Ao_center                                          !opening, convection
-!r,21,As_center                                          !steel
-
-r,22,Aw_center_front,1,emisr_center*emis_gypsum,stef    !front wall, fire exposed
-r,23,Aw_center_back,1,emisr_center*emis_gypsum,stef     !back wall, fire exposed
-r,24,Aw_center_left,1,emisr_center*emis_gypsum,stef     !left wall, fire exposed
-r,25,Aw_center_right,1,emisr_center*emis_gypsum,stef    !right wall, fire exposed
-r,26,Af_center,1,emisr_center*emis_NWC,stef             !floor, fire exposed
-r,27,Ao_center,1,emisr_center,stef                      !opening
-r,28,As_center,1                                        !steel                   
-
+------------HRR link-----------------------------
 dspace=df_center/5              !arbitrary distance
+r,1,1/dspace/(3**0.5)           !link33, HRR
+-----------cetner room------------------------------------------------------
+-----------gas volumes---------------------------
+r,2,Vr_center                   !mass71, gas center room
+-----------boundaries----------------------------
+r,3,Aw_center_front                                    !front wall,conduction
+r,4,Aw_center_back                                     !back wall,conduction
+r,5,Aw_center_left                                     !left wall,conduction
+r,6,Aw_center_right                                    !right wall,conduction
+r,7,Af_center                                          !floor,conduction
+r,8,Aw_center_front,1,emisr_center*emis_gypsum,stef    !front wall, fire exposed
+r,9,Aw_center_back,1,emisr_center*emis_gypsum,stef     !back wall, fire exposed
+r,10,Aw_center_left,1,emisr_center*emis_gypsum,stef    !left wall, fire exposed
+r,11,Aw_center_right,1,emisr_center*emis_gypsum,stef   !right wall, fire exposed
+r,12,Af_center,1,emisr_center*emis_NWC,stef            !floor, fire exposed
+r,13,Aw_center_front,1,emis_gypsum,stef                !front wall, air exposed
+r,14,Aw_center_back,1,emis_gypsum,stef                 !back wall, air exposed
+r,15,Aw_center_left,1,emis_gypsum,stef                 !left wall, air exposed
+r,16,Aw_center_right,1,emis_gypsum,stef                !right wall, air exposed
+r,17,Af_center,1,emis_NWC,stef                         !floor, air exposed
+-----------openings----------------------------
+r,18,Ao_center                                          !opening, convection
+r,19,Ao_center,1,emisr_center,stef                      !opening, radiation
+----------steels-------------------------------
+r,20,Vs_center                                          !steel volume
+r,21,As_center                                          !steel, conduction
+r,22,As_center,1,emisr_center*emis_steel,stef           !steel, radiation
+-------------------------------------------------------------------------------
+-----------front room---------------------------
+-----------gas volumes---------------------------
+r,102,Vr_front                   !mass71, gas center room
+-----------boundaries----------------------------
+r,103,Aw_front_front                                    !front wall,conduction
+r,104,Aw_front_back                                     !back wall,conduction
+r,105,Aw_front_left                                     !left wall,conduction
+r,106,Aw_front_right                                    !right wall,conduction
+r,107,Af_front                                          !floor,conduction
+r,108,Aw_front_front,1,emisr_front*emis_gypsum,stef    !front wall, fire exposed
+r,109,Aw_front_back,1,emisr_front*emis_gypsum,stef     !back wall, fire exposed
+r,110,Aw_front_left,1,emisr_front*emis_gypsum,stef    !left wall, fire exposed
+r,111,Aw_front_right,1,emisr_front*emis_gypsum,stef   !right wall, fire exposed
+r,112,Af_front,1,emisr_front*emis_NWC,stef            !floor, fire exposed
+r,113,Aw_front_front,1,emis_gypsum,stef                !front wall, air exposed
+r,114,Aw_front_back,1,emis_gypsum,stef                 !back wall, air exposed
+r,115,Aw_front_left,1,emis_gypsum,stef                 !left wall, air exposed
+r,116,Aw_front_right,1,emis_gypsum,stef                !right wall, air exposed
+r,117,Af_front,1,emis_NWC,stef                         !floor, air exposed
+-----------openings----------------------------
+r,118,Ao_front                                          !opening, convection
+r,119,Ao_front,1,emisr_front,stef                      !opening, radiation
+----------steels-------------------------------
+r,120,Vs_front                                          !steel volume
+r,121,As_front                                          !steel, conduction
+r,122,As_front,1,emisr_front*emis_steel,stef           !steel, radiation
+-----------------------------------------------------------------------------
+-----------back room---------------------------
+-----------gas volumes---------------------------
+r,202,Vr_back                   !mass71, gas center room
+-----------boundaries----------------------------
+r,203,Aw_back_front                                    !front wall,conduction
+r,204,Aw_back_back                                     !back wall,conduction
+r,205,Aw_back_left                                     !left wall,conduction
+r,206,Aw_back_right                                    !right wall,conduction
+r,207,Af_back                                          !floor,conduction
+r,208,Aw_back_front,1,emisr_back*emis_gypsum,stef    !front wall, fire exposed
+r,209,Aw_back_back,1,emisr_back*emis_gypsum,stef     !back wall, fire exposed
+r,210,Aw_back_left,1,emisr_back*emis_gypsum,stef    !left wall, fire exposed
+r,211,Aw_back_right,1,emisr_back*emis_gypsum,stef   !right wall, fire exposed
+r,212,Af_back,1,emisr_back*emis_NWC,stef            !floor, fire exposed
+r,213,Aw_back_front,1,emis_gypsum,stef                !front wall, air exposed
+r,214,Aw_back_back,1,emis_gypsum,stef                 !back wall, air exposed
+r,215,Aw_back_left,1,emis_gypsum,stef                 !left wall, air exposed
+r,216,Aw_back_right,1,emis_gypsum,stef                !right wall, air exposed
+r,217,Af_back,1,emis_NWC,stef                         !floor, air exposed
+-----------openings----------------------------
+r,218,Ao_back                                          !opening, convection
+r,219,Ao_back,1,emisr_back,stef                      !opening, radiation
+----------steels-------------------------------
+r,220,Vs_back                                          !steel volume
+r,221,As_back                                          !steel, conduction
+r,222,As_back,1,emisr_back*emis_steel,stef           !steel, radiation
+-----------------------------------------------------------------------------
+-----------left room---------------------------
+-----------gas volumes---------------------------
+r,302,Vr_left                   !mass71, gas center room
+-----------boundaries----------------------------
+r,303,Aw_left_front                                    !front wall,conduction
+r,304,Aw_left_back                                     !back wall,conduction
+r,305,Aw_left_left                                     !left wall,conduction
+r,306,Aw_left_right                                    !right wall,conduction
+r,307,Af_left                                          !floor,conduction
 
-r,29,1/dspace/(3**0.5)          !link33, HRR 
+r,308,Aw_left_front,1,emisr_left*emis_gypsum,stef    !front wall, fire exposed
+r,309,Aw_left_back,1,emisr_left*emis_gypsum,stef     !back wall, fire exposed
+r,310,Aw_left_left,1,emisr_left*emis_gypsum,stef    !left wall, fire exposed
+r,311,Aw_left_right,1,emisr_left*emis_gypsum,stef   !right wall, fire exposed
+r,312,Af_left,1,emisr_left*emis_NWC,stef            !floor, fire exposed
 
-r,30,Aw_center_front,1,emis_gypsum,stef    !front wall, air exposed
-r,31,Aw_center_back,1,emis_gypsum,stef     !back wall, air exposed
-r,32,Aw_center_left,1,emis_gypsum,stef     !left wall, air exposed
-r,33,Aw_center_right,1,emis_gypsum,stef    !right wall, air exposed
-r,34,Af_center,1,emis_NWC,stef             !floor, air exposed
+r,313,Aw_left_front,1,emis_gypsum,stef                !front wall, air exposed
+r,314,Aw_left_back,1,emis_gypsum,stef                 !back wall, air exposed
+r,315,Aw_left_left,1,emis_gypsum,stef                 !left wall, air exposed
+r,316,Aw_left_right,1,emis_gypsum,stef                !right wall, air exposed
+r,317,Af_left,1,emis_NWC,stef                         !floor, air exposed
+-----------openings----------------------------
+r,318,Ao_left                                          !opening, convection
+r,319,Ao_left,1,emisr_left,stef                      !opening, radiation
+----------steels-------------------------------
+r,320,Vs_left                                          !steel volume
+r,321,As_left                                          !steel, conduction
+r,322,As_left,1,emisr_left*emis_steel,stef           !steel, radiation
+-----------------------------------------------------------------------------
+-----------right room---------------------------
+-----------gas volumes---------------------------
+r,402,Vr_right                   !mass71, gas center room
+-----------boundaries----------------------------
+r,403,Aw_right_front                                    !front wall,conduction
+r,404,Aw_right_back                                     !back wall,conduction
+r,405,Aw_right_left                                     !left wall,conduction
+r,406,Aw_right_right                                    !right wall,conduction
+r,407,Af_right                                          !floor,conduction
 
-k,1,0,0,0                                  !point for center room
+r,408,Aw_right_front,1,emisr_right*emis_gypsum,stef    !front wall, fire exposed
+r,409,Aw_right_back,1,emisr_right*emis_gypsum,stef     !back wall, fire exposed
+r,410,Aw_right_left,1,emisr_left*emis_gypsum,stef    !left wall, fire exposed
+r,411,Aw_right_right,1,emisr_right*emis_gypsum,stef   !right wall, fire exposed
+r,412,Af_right,1,emisr_right*emis_NWC,stef            !floor, fire exposed
 
-k,2,0,0,dspace
-k,3,0,0,dspace+dw_center_front
-k,4,0,0,dspace+dw_center_front+dspace    !point for front room
+r,413,Aw_right_front,1,emis_gypsum,stef                !front wall, air exposed
+r,414,Aw_right_back,1,emis_gypsum,stef                 !back wall, air exposed
+r,415,Aw_right_left,1,emis_gypsum,stef                 !left wall, air exposed
+r,416,Aw_right_right,1,emis_gypsum,stef                !right wall, air exposed
+r,417,Af_right,1,emis_NWC,stef                         !floor, air exposed
+-----------openings----------------------------
+r,418,Ao_right                                          !opening, convection
+r,419,Ao_right,1,emisr_right,stef                      !opening, radiation
+----------steels-------------------------------
+r,420,Vs_right                                          !steel volume
+r,421,As_right                                          !steel, conduction
+r,422,As_right,1,emisr_right*emis_steel,stef           !steel, radiation
+----------------------------------------------------------------------------
+-----------cetner room---------------------------
+-----------gas volumes---------------------------
+r,502,Vr_top                   !mass71, gas center room
+-----------boundaries----------------------------
+r,503,Aw_top_front                                    !front wall,conduction
+r,504,Aw_top_back                                     !back wall,conduction
+r,505,Aw_top_left                                     !left wall,conduction
+r,506,Aw_top_right                                    !right wall,conduction
+r,507,Af_top                                          !floor,conduction
+r,508,Aw_top_front,1,emisr_top*emis_gypsum,stef    !front wall, fire exposed
+r,509,Aw_top_back,1,emisr_top*emis_gypsum,stef     !back wall, fire exposed
+r,510,Aw_top_left,1,emisr_top*emis_gypsum,stef    !left wall, fire exposed
+r,511,Aw_top_right,1,emisr_top*emis_gypsum,stef   !right wall, fire exposed
+r,512,Af_top,1,emisr_top*emis_NWC,stef            !floor, fire exposed
+r,513,Aw_top_front,1,emis_gypsum,stef                !front wall, air exposed
+r,514,Aw_top_back,1,emis_gypsum,stef                 !back wall, air exposed
+r,515,Aw_top_left,1,emis_gypsum,stef                 !left wall, air exposed
+r,516,Aw_top_right,1,emis_gypsum,stef                !right wall, air exposed
+r,517,Af_top,1,emis_NWC,stef                         !floor, air exposed
+-----------openings----------------------------
+r,518,Ao_top                                          !opening, convection
+r,519,Ao_top,1,emisr_top,stef                      !opening, radiation
+----------steels-------------------------------
+r,520,Vs_top                                          !steel volume
+r,521,As_top                                          !steel, conduction
+r,522,As_top,1,emisr_top*emis_steel,stef           !steel, radiation
+----------------------------------------------------------------------------
+-----------bottom room---------------------------
+-----------gas volumes---------------------------
+r,602,Vr_bottom                   !mass71, gas center room
+-----------boundaries----------------------------
+r,603,Aw_bottom_front                                    !front wall,conduction
+r,604,Aw_bottom_back                                     !back wall,conduction
+r,605,Aw_bottom_left                                     !left wall,conduction
+r,606,Aw_bottom_right                                    !right wall,conduction
+r,607,Af_bottom                                          !floor,conduction
+r,608,Aw_bottom_front,1,emisr_bottom*emis_gypsum,stef    !front wall, fire exposed
+r,609,Aw_bottom_back,1,emisr_bottom*emis_gypsum,stef     !back wall, fire exposed
+r,610,Aw_bottom_left,1,emisr_bottom*emis_gypsum,stef    !left wall, fire exposed
+r,611,Aw_bottom_right,1,emisr_bottom*emis_gypsum,stef   !right wall, fire exposed
+r,612,Af_bottom,1,emisr_bottom*emis_NWC,stef            !floor, fire exposed
+r,613,Aw_bottom_front,1,emis_gypsum,stef                !front wall, air exposed
+r,614,Aw_bottom_back,1,emis_gypsum,stef                 !back wall, air exposed
+r,615,Aw_bottom_left,1,emis_gypsum,stef                 !left wall, air exposed
+r,616,Aw_bottom_right,1,emis_gypsum,stef                !right wall, air exposed
+r,617,Af_bottom,1,emis_NWC,stef                         !floor, air exposed
+-----------openings----------------------------
+r,618,Ao_bottom                                          !opening, convection
+r,619,Ao_bottom,1,emisr_bottom,stef                      !opening, radiation
+----------steels-------------------------------
+r,620,Vs_bottom                                          !steel volume
+r,621,As_bottom                                          !steel, conduction
+r,622,As_bottom,1,emisr_bottom*emis_steel,stef           !steel, radiation
+-----------------------------------------------------------------------------
+-------------model geometries------------------
+-------------center room-----------------------
+csys,0
+Xcenter_center=0
+Ycenter_center=0
+Zcenter_center=0
+clocal,11,0,Xcenter_center,Ycenter_center,Zcenter_center
+csys,11
+wpcsys,1,11
+------------key points------------------------
+kp_1=1                                       ! center point
+kp_2=2                                       ! front wall, front point
+kp_3=3                                       ! front wall, back point
+kp_4=4                                       ! back wall, front point
+kp_5=5                                       ! back wall, back point
+kp_6=6                                       ! left wall, front point
+kp_7=7                                       ! left wall, back point
+kp_8=8                                       ! right wall, front point                                       
+kp_9=9                                       ! right wall, back point
+kp_10=10                                     ! top floor, front point
+kp_11=11                                     ! top floor, back point
+kp_12=12                                     ! bottom floor, front point
+kp_13=13                                     ! bottom floor, back point
+kp_14=14                                     ! HRR point
+kp_15=15                                     ! opening point
 
-k,5,0,0,-dspace
-k,6,0,0,-dspace-dw_center_back
-k,7,0,0,-dspace-dw_center_back-dspace    !point for back room
-
-k,8,-dspace,0,0
-k,9,-dspace-dw_center_left,0,0
-k,10,-dspace-dw_center_left-dspace,0,0     !point for left room
-
-k,11,dspace,0,0
-k,12,dspace+dw_center_right,0,0
-k,13,dspace+dw_center_right+dspace,0,0     !point for right room
-
-k,14,0,dspace,0
-k,15,0,dspace+df_center,0
-k,16,0,dspace+df_center+dspace,0          !point for top room
-
-k,17,0,-dspace,0
-k,18,0,-dspace-df_center,0
-k,19,0,-dspace-df_center-dspace,0         !point for bottom room
-
--------model gas volumes-------------------------------
+k,kp_1,0,0,0                                !point for center room
+k,kp_2,0,0,dspace                           !front wall
+k,kp_3,0,0,dspace+dw_center_front
+k,kp_4,0,0,-dspace                          !back wall
+k,kp_5,0,0,-dspace-dw_center_back
+k,kp_6,-dspace,0,0                          !left wall
+k,kp_7,-dspace-dw_center_left,0,0
+k,kp_8,dspace,0,0                           !right wall
+k,kp_9,dspace+dw_center_right,0,0
+k,kp_10,0,dspace,0                          !top wall
+k,kp_11,0,dspace+df_center,0
+k,kp_12,0,-dspace,0                         !bottom wall
+k,kp_13,0,-dspace-df_center,0
+-----------gas volume-------------------------
 type,71
 mat,6
-real,1
-kmesh,1                       !gas center room
 real,2
-kmesh,4                      !front room
-real,3
-kmesh,7                      !back room
-real,4
-kmesh,10                       !gas left room
-real,5
-kmesh,13                       !gas right room
-real,6
-kmesh,16                      !gas top room
-real,7
-kmesh,19                      !bottom room
--------------------------------------------------------                        
--------model walls and floors--------------------------
+kmesh,kp_1
 -------center front wall-------------------------------
-l,2,3,numw_center_front 
+l,kp_2,kp_3,numw_center_front 
 type,33
 mat,1
-real,15
-lmesh,1                                          
+real,3
+lsel,s,loc,x,0
+lsel,r,loc,y,0
+lsel,r,loc,z,dspace+dw_center_front/2
+lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,0,dspace)
-nodeNo3=node(0,0,dspace+dw_center_front)
-nodeNo4=node(0,0,dspace+dw_center_front+dspace)
 type,31
 mat,16
-real,22
-e,nodeNo1,nodeNo2
-mat,37
-real,30
-e,nodeNo3,nodeNo4                       
+real,8
+e,nodeNo1,nodeNo2                   
 type,34
-real,15
+real,3
 mat,7
 e,nodeNo1,nodeNo2
-mat,8                            
-e,nodeNo3,nodeNo4
 -------center back wall-------------------------------
-l,5,6,numw_center_back      
+l,kp_4,kp_5,numw_center_back      
 type,33
 mat,1
-real,16
-lmesh,2                                          
+real,4
+lsel,s,loc,x,0
+lsel,r,loc,y,0
+lsel,r,loc,z,-dspace-dw_center_back/2
+lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,0,-dspace)
-nodeNo3=node(0,0,-dspace-dw_center_back)
-nodeNo4=node(0,0,-dspace-dw_center_back-dspace)
 type,31
 mat,16
-real,23
-e,nodeNo1,nodeNo2
-mat,37
-real,31
-e,nodeNo3,nodeNo4                       
+real,9
+e,nodeNo1,nodeNo2                      
 type,34
-real,16
+real,4
 mat,7
 e,nodeNo1,nodeNo2
-mat,8                            
-e,nodeNo3,nodeNo4
 -------center left wall-------------------------------
-l,8,9,numw_center_left 
+l,kp_6,kp_7,numw_center_left 
 type,33
 mat,1
-real,17
-lmesh,3                                          
+real,5
+lsel,s,loc,x,-dspace-dw_center_left/2
+lsel,r,loc,y,0
+lsel,r,loc,z,0
+lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(-dspace,0,0)
-nodeNo3=node(-dspace-dw_center_left,0,0)
-nodeNo4=node(-dspace-dw_center_left-dspace,0,0)
 type,31
 mat,16
-real,24
-e,nodeNo1,nodeNo2
-mat,37
-real,32
-e,nodeNo3,nodeNo4                       
+real,10
+e,nodeNo1,nodeNo2                     
 type,34
-real,17
+real,5
 mat,7
 e,nodeNo1,nodeNo2 
-mat,8                            
-e,nodeNo3,nodeNo4
 -------center right wall-------------------------------
-l,11,12,numw_center_right      
+l,kp_8,kp_9,numw_center_right      
 type,33
 mat,1
-real,18
-lmesh,4                                          
+real,6
+lsel,s,loc,x,dspace+dw_center_right/2
+lsel,r,loc,y,0
+lsel,r,loc,z,0
+lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(dspace,0,0)
-nodeNo3=node(dspace+dw_center_right,0,0)
-nodeNo4=node(dspace+dw_center_right+dspace,0,0)
 type,31
 mat,16
-real,25
-e,nodeNo1,nodeNo2
-mat,37
-real,33
-e,nodeNo3,nodeNo4                      
+real,11
+e,nodeNo1,nodeNo2                     
 type,34
-real,18
+real,6
 mat,7
-e,nodeNo1,nodeNo2
-mat,8                            
-e,nodeNo3,nodeNo4              
+e,nodeNo1,nodeNo2             
 -------center top wall-------------------------------
-l,14,15,num_center_floor        !center top floor
+l,kp_10,kp_11,num_center_floor        !center top floor
 type,33
 mat,2
-real,19
-lmesh,5                                        
+real,7
+lsel,s,loc,x,0
+lsel,r,loc,y,dspace+df_center/2
+lsel,r,loc,z,0
+lmesh,all                                        
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,dspace,0)
-nodeNo3=node(0,dspace+df_center,0)
-nodeNo4=node(0,dspace+df_center+dspace,0)
 type,31
 mat,17
-real,26
-e,nodeNo1,nodeNo2
-mat,38
-real,34
-e,nodeNo3,nodeNo4                      
+real,12
+e,nodeNo1,nodeNo2                     
 type,34
-real,19
+real,7
 mat,7
-e,nodeNo1,nodeNo2
-mat,8                            
-e,nodeNo3,nodeNo4             
+e,nodeNo1,nodeNo2            
 -------center bottom wall-------------------------------
-l,17,18,num_center_floor      !center bottom floor
+l,kp_12,kp_13,num_center_floor      !center bottom floor
 type,33
 mat,2
-real,19
-lmesh,6                                          
+real,8
+lsel,s,loc,x,0
+lsel,r,loc,y,-dspace-df_center/2
+lsel,r,loc,z,0
+lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,-dspace,0)
-nodeNo3=node(0,-dspace-df_center,0)
-nodeNo4=node(0,-dspace-df_center-dspace,0)
 type,31
 mat,17
-real,26
-e,nodeNo1,nodeNo2
-mat,38
-real,34
-e,nodeNo3,nodeNo4                        
+real,13
+e,nodeNo1,nodeNo2                      
 type,34
-real,19
+real,8
 mat,7
 e,nodeNo1,nodeNo2
-mat,8                            
-e,nodeNo3,nodeNo4
--------------------------------------------------------
--------------------------------------------------------
-nodeNo1=node(0,0,0)                                !center room gas 
-nodeNo2=node(0,0,dspace+dw_center_front+dspace)    !front room gas
-nodeNo3=node(0,0,-dspace-dw_center_back-dspace)    !back room gas
-nodeNo4=node(-dspace-dw_center_left-dspace,0,0)    !left room gas
-nodeNo5=node(dspace+dw_center_right+dspace,0,0)    !right room gas
-nodeNo6=node(0,dspace+df_center+dspace,0)          !top room gas
-nodeNo7=node(0,-dspace-df_center-dspace,0)         !bottom room gas
--------------------------------------------------------
--------model openings----------------------------------
--------------------------------------------------------
-*get,nodemax,node,,count
-n,nodemax+1,-dspace,-dspace,-dspace
-nodeNo8=node(-dspace,-dspace,-dspace)              !outside 
-type,31
-mat,30
-real,27
-e,nodeNo1,nodeNo8
-type,34
-real,20
-mat,9
-e,nodeNo1,nodeNo8
---------------------------------------------------------
-------model HRR--------------------------------
---------------------------------------------------------
-n,nodemax+2,dspace,-dspace,-dspace
-nodeNo9=node(dspace,-dspace,-dspace)               !HRR source
+-----------------------------------------------------------------------------
+-------------model geometries------------------
+-------------front room-----------------------
+csys,0
+Xcenter_center=0
+Ycenter_center=0
+Zcenter_center=dspace+dw_center_front+dspace
+clocal,11,0,Xcenter_center,Ycenter_center,Zcenter_center
+csys,11
+wpcsys,1,11
+------------key points------------------------
+kp_1=101
+kp_2=102
+kp_3=103
+kp_4=104
+kp_5=105
+kp_6=106
+kp_7=107
+kp_8=108
+kp_9=109
+kp_10=110
+kp_11=111
+kp_12=112
+kp_13=113
+
+k,kp_1,0,0,0                                !point for center room
+k,kp_2,0,0,dspace                           !front wall
+k,kp_3,0,0,dspace+dw_center_front
+k,kp_4,0,0,-dspace                          !back wall
+k,kp_5,0,0,-dspace-dw_center_back
+k,kp_6,-dspace,0,0                          !left wall
+k,kp_7,-dspace-dw_center_left,0,0
+k,kp_8,dspace,0,0                           !right wall
+k,kp_9,dspace+dw_center_right,0,0
+k,kp_10,0,dspace,0                          !top wall
+k,kp_11,0,dspace+df_center,0
+k,kp_12,0,-dspace,0                         !bottom wall
+k,kp_13,0,-dspace-df_center,0
+-----------gas volume-------------------------
+type,71
+mat,6
+real,102
+kmesh,kp_1
+-------center front wall-------------------------------
+l,kp_2,kp_3,numw_center_front 
 type,33
-mat,5
-real,29
-e,nodeNo1,nodeNo9
----------load------------------------
-toffset,273
-tunif,20
-esel,s,mat,,5
-bfe,all,hgen,,%HRR_center%
-allsel
-d,nodeNo2,temp,20
-d,nodeNo3,temp,20
-d,nodeNo4,temp,20
-d,nodeNo5,temp,20
-d,nodeNo6,temp,20
-d,nodeNo7,temp,20
-d,nodeNo8,temp,20
-allsel
-/solu
-antype,4
-autots,on
-deltim,10,0.1,100
-time,1800
-outres,all,all
-allsel
-solve
+mat,1
+real,103
+lsel,s,loc,x,0
+lsel,r,loc,y,0
+lsel,r,loc,z,dspace+dw_center_front/2
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,0,dspace)
+type,31
+mat,16
+real,108
+e,nodeNo1,nodeNo2                   
+type,34
+real,3
+mat,7
+e,nodeNo1,nodeNo2
+-------center back wall-------------------------------
+l,kp_4,kp_5,numw_center_back      
+type,33
+mat,1
+real,104
+lsel,s,loc,x,0
+lsel,r,loc,y,0
+lsel,r,loc,z,-dspace-dw_center_back/2
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,0,-dspace)
+type,31
+mat,16
+real,109
+e,nodeNo1,nodeNo2                      
+type,34
+real,104
+mat,7
+e,nodeNo1,nodeNo2
+-------center left wall-------------------------------
+l,kp_6,kp_7,numw_center_left 
+type,33
+mat,1
+real,105
+lsel,s,loc,x,-dspace-dw_center_left/2
+lsel,r,loc,y,0
+lsel,r,loc,z,0
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(-dspace,0,0)
+type,31
+mat,16
+real,110
+e,nodeNo1,nodeNo2                     
+type,34
+real,105
+mat,7
+e,nodeNo1,nodeNo2 
+-------center right wall-------------------------------
+l,kp_8,kp_9,numw_center_right      
+type,33
+mat,1
+real,106
+lsel,s,loc,x,dspace+dw_center_right/2
+lsel,r,loc,y,0
+lsel,r,loc,z,0
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(dspace,0,0)
+type,31
+mat,16
+real,111
+e,nodeNo1,nodeNo2                     
+type,34
+real,106
+mat,7
+e,nodeNo1,nodeNo2             
+-------center top wall-------------------------------
+l,kp_10,kp_11,num_center_floor        !center top floor
+type,33
+mat,2
+real,107
+lsel,s,loc,x,0
+lsel,r,loc,y,dspace+df_center/2
+lsel,r,loc,z,0
+lmesh,all                                        
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,dspace,0)
+type,31
+mat,17
+real,112
+e,nodeNo1,nodeNo2                     
+type,34
+real,107
+mat,7
+e,nodeNo1,nodeNo2            
+-------center bottom wall-------------------------------
+l,kp_12,kp_13,num_center_floor      !center bottom floor
+type,33
+mat,2
+real,108
+lsel,s,loc,x,0
+lsel,r,loc,y,-dspace-df_center/2
+lsel,r,loc,z,0
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,-dspace,0)
+type,31
+mat,17
+real,113
+e,nodeNo1,nodeNo2                      
+type,34
+real,108
+mat,7
+e,nodeNo1,nodeNo2
+-----------------------------------------------------------------------------
+-------------model geometries------------------
+-------------back room-----------------------
+csys,0
+Xcenter_center=0
+Ycenter_center=0
+Zcenter_center=-dspace-dw_center_back-dspace
+clocal,11,0,Xcenter_center,Ycenter_center,Zcenter_center
+csys,11
+wpcsys,1,11
+------------key points------------------------
+kp_1=201
+kp_2=202
+kp_3=203
+kp_4=204
+kp_5=205
+kp_6=206
+kp_7=207
+kp_8=208
+kp_9=209
+kp_10=210
+kp_11=211
+kp_12=212
+kp_13=213
+
+k,kp_1,0,0,0                                !point for center room
+k,kp_2,0,0,dspace                           !front wall
+k,kp_3,0,0,dspace+dw_center_front
+k,kp_4,0,0,-dspace                          !back wall
+k,kp_5,0,0,-dspace-dw_center_back
+k,kp_6,-dspace,0,0                          !left wall
+k,kp_7,-dspace-dw_center_left,0,0
+k,kp_8,dspace,0,0                           !right wall
+k,kp_9,dspace+dw_center_right,0,0
+k,kp_10,0,dspace,0                          !top wall
+k,kp_11,0,dspace+df_center,0
+k,kp_12,0,-dspace,0                         !bottom wall
+k,kp_13,0,-dspace-df_center,0
+-----------gas volume-------------------------
+type,71
+mat,6
+real,202
+kmesh,kp_1
+-------center front wall-------------------------------
+l,kp_2,kp_3,numw_center_front 
+type,33
+mat,1
+real,203
+lsel,s,loc,x,0
+lsel,r,loc,y,0
+lsel,r,loc,z,dspace+dw_center_front/2
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,0,dspace)
+type,31
+mat,16
+real,208
+e,nodeNo1,nodeNo2                   
+type,34
+real,203
+mat,7
+e,nodeNo1,nodeNo2
+-------center back wall-------------------------------
+l,kp_4,kp_5,numw_center_back      
+type,33
+mat,1
+real,204
+lsel,s,loc,x,0
+lsel,r,loc,y,0
+lsel,r,loc,z,-dspace-dw_center_back/2
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,0,-dspace)
+type,31
+mat,16
+real,209
+e,nodeNo1,nodeNo2                      
+type,34
+real,204
+mat,7
+e,nodeNo1,nodeNo2
+-------center left wall-------------------------------
+l,kp_6,kp_7,numw_center_left 
+type,33
+mat,1
+real,205
+lsel,s,loc,x,-dspace-dw_center_left/2
+lsel,r,loc,y,0
+lsel,r,loc,z,0
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(-dspace,0,0)
+type,31
+mat,16
+real,210
+e,nodeNo1,nodeNo2                     
+type,34
+real,205
+mat,7
+e,nodeNo1,nodeNo2 
+-------center right wall-------------------------------
+l,kp_8,kp_9,numw_center_right      
+type,33
+mat,1
+real,206
+lsel,s,loc,x,dspace+dw_center_right/2
+lsel,r,loc,y,0
+lsel,r,loc,z,0
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(dspace,0,0)
+type,31
+mat,16
+real,211
+e,nodeNo1,nodeNo2                     
+type,34
+real,206
+mat,7
+e,nodeNo1,nodeNo2             
+-------center top wall-------------------------------
+l,kp_10,kp_11,num_center_floor        !center top floor
+type,33
+mat,2
+real,207
+lsel,s,loc,x,0
+lsel,r,loc,y,dspace+df_center/2
+lsel,r,loc,z,0
+lmesh,all                                        
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,dspace,0)
+type,31
+mat,17
+real,212
+e,nodeNo1,nodeNo2                     
+type,34
+real,207
+mat,7
+e,nodeNo1,nodeNo2            
+-------center bottom wall-------------------------------
+l,kp_12,kp_13,num_center_floor      !center bottom floor
+type,33
+mat,2
+real,208
+lsel,s,loc,x,0
+lsel,r,loc,y,-dspace-df_center/2
+lsel,r,loc,z,0
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,-dspace,0)
+type,31
+mat,17
+real,213
+e,nodeNo1,nodeNo2                      
+type,34
+real,208
+mat,7
+e,nodeNo1,nodeNo2
+-----------------------------------------------------------------------------
+-------------model geometries------------------
+-------------left room-----------------------
+csys,0
+Xcenter_center=-dspace-dw_center_left-dspace
+Ycenter_center=0
+Zcenter_center=0
+clocal,11,0,Xcenter_center,Ycenter_center,Zcenter_center
+csys,11
+wpcsys,1,11
+------------key points------------------------
+kp_1=301
+kp_2=302
+kp_3=303
+kp_4=304
+kp_5=305
+kp_6=306
+kp_7=307
+kp_8=308
+kp_9=309
+kp_10=310
+kp_11=311
+kp_12=312
+kp_13=313
+
+k,kp_1,0,0,0                                !point for center room
+k,kp_2,0,0,dspace                           !front wall
+k,kp_3,0,0,dspace+dw_center_front
+k,kp_4,0,0,-dspace                          !back wall
+k,kp_5,0,0,-dspace-dw_center_back
+k,kp_6,-dspace,0,0                          !left wall
+k,kp_7,-dspace-dw_center_left,0,0
+k,kp_8,dspace,0,0                           !right wall
+k,kp_9,dspace+dw_center_right,0,0
+k,kp_10,0,dspace,0                          !top wall
+k,kp_11,0,dspace+df_center,0
+k,kp_12,0,-dspace,0                         !bottom wall
+k,kp_13,0,-dspace-df_center,0
+-----------gas volume-------------------------
+type,71
+mat,6
+real,302
+kmesh,kp_1
+-------center front wall-------------------------------
+l,kp_2,kp_3,numw_center_front 
+type,33
+mat,1
+real,303
+lsel,s,loc,x,0
+lsel,r,loc,y,0
+lsel,r,loc,z,dspace+dw_center_front/2
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,0,dspace)
+type,31
+mat,16
+real,308
+e,nodeNo1,nodeNo2                   
+type,34
+real,303
+mat,7
+e,nodeNo1,nodeNo2
+-------center back wall-------------------------------
+l,kp_4,kp_5,numw_center_back      
+type,33
+mat,1
+real,304
+lsel,s,loc,x,0
+lsel,r,loc,y,0
+lsel,r,loc,z,-dspace-dw_center_back/2
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,0,-dspace)
+type,31
+mat,16
+real,309
+e,nodeNo1,nodeNo2                      
+type,34
+real,304
+mat,7
+e,nodeNo1,nodeNo2
+-------center left wall-------------------------------
+l,kp_6,kp_7,numw_center_left 
+type,33
+mat,1
+real,305
+lsel,s,loc,x,-dspace-dw_center_left/2
+lsel,r,loc,y,0
+lsel,r,loc,z,0
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(-dspace,0,0)
+type,31
+mat,16
+real,310
+e,nodeNo1,nodeNo2                     
+type,34
+real,305
+mat,7
+e,nodeNo1,nodeNo2 
+-------center right wall-------------------------------
+l,kp_8,kp_9,numw_center_right      
+type,33
+mat,1
+real,306
+lsel,s,loc,x,dspace+dw_center_right/2
+lsel,r,loc,y,0
+lsel,r,loc,z,0
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(dspace,0,0)
+type,31
+mat,16
+real,311
+e,nodeNo1,nodeNo2                     
+type,34
+real,306
+mat,7
+e,nodeNo1,nodeNo2             
+-------center top wall-------------------------------
+l,kp_10,kp_11,num_center_floor        !center top floor
+type,33
+mat,2
+real,307
+lsel,s,loc,x,0
+lsel,r,loc,y,dspace+df_center/2
+lsel,r,loc,z,0
+lmesh,all                                        
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,dspace,0)
+type,31
+mat,17
+real,312
+e,nodeNo1,nodeNo2                     
+type,34
+real,307
+mat,7
+e,nodeNo1,nodeNo2            
+-------center bottom wall-------------------------------
+l,kp_12,kp_13,num_center_floor      !center bottom floor
+type,33
+mat,2
+real,308
+lsel,s,loc,x,0
+lsel,r,loc,y,-dspace-df_center/2
+lsel,r,loc,z,0
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,-dspace,0)
+type,31
+mat,17
+real,313
+e,nodeNo1,nodeNo2                      
+type,34
+real,308
+mat,7
+e,nodeNo1,nodeNo2
+-----------------------------------------------------------------------------
+-------------model geometries------------------
+-------------right room-----------------------
+csys,0
+Xcenter_center=dspace+dw_center_right+dspace
+Ycenter_center=0
+Zcenter_center=0
+clocal,11,0,Xcenter_center,Ycenter_center,Zcenter_center
+csys,11
+wpcsys,1,11
+------------key points------------------------
+kp_1=401
+kp_2=402
+kp_3=403
+kp_4=404
+kp_5=405
+kp_6=406
+kp_7=407
+kp_8=408
+kp_9=409
+kp_10=410
+kp_11=411
+kp_12=412
+kp_13=413
+
+k,kp_1,0,0,0                                !point for center room
+k,kp_2,0,0,dspace                           !front wall
+k,kp_3,0,0,dspace+dw_center_front
+k,kp_4,0,0,-dspace                          !back wall
+k,kp_5,0,0,-dspace-dw_center_back
+k,kp_6,-dspace,0,0                          !left wall
+k,kp_7,-dspace-dw_center_left,0,0
+k,kp_8,dspace,0,0                           !right wall
+k,kp_9,dspace+dw_center_right,0,0
+k,kp_10,0,dspace,0                          !top wall
+k,kp_11,0,dspace+df_center,0
+k,kp_12,0,-dspace,0                         !bottom wall
+k,kp_13,0,-dspace-df_center,0
+-----------gas volume-------------------------
+type,71
+mat,6
+real,402
+kmesh,kp_1
+-------center front wall-------------------------------
+l,kp_2,kp_3,numw_center_front 
+type,33
+mat,1
+real,403
+lsel,s,loc,x,0
+lsel,r,loc,y,0
+lsel,r,loc,z,dspace+dw_center_front/2
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,0,dspace)
+type,31
+mat,16
+real,408
+e,nodeNo1,nodeNo2                   
+type,34
+real,403
+mat,7
+e,nodeNo1,nodeNo2
+-------center back wall-------------------------------
+l,kp_4,kp_5,numw_center_back      
+type,33
+mat,1
+real,404
+lsel,s,loc,x,0
+lsel,r,loc,y,0
+lsel,r,loc,z,-dspace-dw_center_back/2
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,0,-dspace)
+type,31
+mat,16
+real,409
+e,nodeNo1,nodeNo2                      
+type,34
+real,404
+mat,7
+e,nodeNo1,nodeNo2
+-------center left wall-------------------------------
+l,kp_6,kp_7,numw_center_left 
+type,33
+mat,1
+real,405
+lsel,s,loc,x,-dspace-dw_center_left/2
+lsel,r,loc,y,0
+lsel,r,loc,z,0
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(-dspace,0,0)
+type,31
+mat,16
+real,410
+e,nodeNo1,nodeNo2                     
+type,34
+real,405
+mat,7
+e,nodeNo1,nodeNo2 
+-------center right wall-------------------------------
+l,kp_8,kp_9,numw_center_right      
+type,33
+mat,1
+real,406
+lsel,s,loc,x,dspace+dw_center_right/2
+lsel,r,loc,y,0
+lsel,r,loc,z,0
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(dspace,0,0)
+type,31
+mat,16
+real,411
+e,nodeNo1,nodeNo2                     
+type,34
+real,406
+mat,7
+e,nodeNo1,nodeNo2             
+-------center top wall-------------------------------
+l,kp_10,kp_11,num_center_floor        !center top floor
+type,33
+mat,2
+real,407
+lsel,s,loc,x,0
+lsel,r,loc,y,dspace+df_center/2
+lsel,r,loc,z,0
+lmesh,all                                        
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,dspace,0)
+type,31
+mat,17
+real,412
+e,nodeNo1,nodeNo2                     
+type,34
+real,407
+mat,7
+e,nodeNo1,nodeNo2            
+-------center bottom wall-------------------------------
+l,kp_12,kp_13,num_center_floor      !center bottom floor
+type,33
+mat,2
+real,408
+lsel,s,loc,x,0
+lsel,r,loc,y,-dspace-df_center/2
+lsel,r,loc,z,0
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,-dspace,0)
+type,31
+mat,17
+real,413
+e,nodeNo1,nodeNo2                      
+type,34
+real,408
+mat,7
+e,nodeNo1,nodeNo2
+-----------------------------------------------------------------------------
+-------------model geometries------------------
+-------------top room-----------------------
+csys,0
+Xcenter_center=0
+Ycenter_center=dspace+df_center+dspace
+Zcenter_center=0
+clocal,11,0,Xcenter_center,Ycenter_center,Zcenter_center
+csys,11
+wpcsys,1,11
+------------key points------------------------
+kp_1=501
+kp_2=502
+kp_3=503
+kp_4=504
+kp_5=505
+kp_6=506
+kp_7=507
+kp_8=508
+kp_9=509
+kp_10=510
+kp_11=511
+kp_12=512
+kp_13=513
+
+k,kp_1,0,0,0                                !point for center room
+k,kp_2,0,0,dspace                           !front wall
+k,kp_3,0,0,dspace+dw_center_front
+k,kp_4,0,0,-dspace                          !back wall
+k,kp_5,0,0,-dspace-dw_center_back
+k,kp_6,-dspace,0,0                          !left wall
+k,kp_7,-dspace-dw_center_left,0,0
+k,kp_8,dspace,0,0                           !right wall
+k,kp_9,dspace+dw_center_right,0,0
+k,kp_10,0,dspace,0                          !top wall
+k,kp_11,0,dspace+df_center,0
+k,kp_12,0,-dspace,0                         !bottom wall
+k,kp_13,0,-dspace-df_center,0
+-----------gas volume-------------------------
+type,71
+mat,6
+real,502
+kmesh,kp_1
+-------center front wall-------------------------------
+l,kp_2,kp_3,numw_center_front 
+type,33
+mat,1
+real,503
+lsel,s,loc,x,0
+lsel,r,loc,y,0
+lsel,r,loc,z,dspace+dw_center_front/2
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,0,dspace)
+type,31
+mat,16
+real,508
+e,nodeNo1,nodeNo2                   
+type,34
+real,503
+mat,7
+e,nodeNo1,nodeNo2
+-------center back wall-------------------------------
+l,kp_4,kp_5,numw_center_back      
+type,33
+mat,1
+real,504
+lsel,s,loc,x,0
+lsel,r,loc,y,0
+lsel,r,loc,z,-dspace-dw_center_back/2
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,0,-dspace)
+type,31
+mat,16
+real,509
+e,nodeNo1,nodeNo2                      
+type,34
+real,504
+mat,7
+e,nodeNo1,nodeNo2
+-------center left wall-------------------------------
+l,kp_6,kp_7,numw_center_left 
+type,33
+mat,1
+real,505
+lsel,s,loc,x,-dspace-dw_center_left/2
+lsel,r,loc,y,0
+lsel,r,loc,z,0
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(-dspace,0,0)
+type,31
+mat,16
+real,510
+e,nodeNo1,nodeNo2                     
+type,34
+real,505
+mat,7
+e,nodeNo1,nodeNo2 
+-------center right wall-------------------------------
+l,kp_8,kp_9,numw_center_right      
+type,33
+mat,1
+real,506
+lsel,s,loc,x,dspace+dw_center_right/2
+lsel,r,loc,y,0
+lsel,r,loc,z,0
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(dspace,0,0)
+type,31
+mat,16
+real,511
+e,nodeNo1,nodeNo2                     
+type,34
+real,506
+mat,7
+e,nodeNo1,nodeNo2             
+-------center top wall-------------------------------
+l,kp_10,kp_11,num_center_floor        !center top floor
+type,33
+mat,2
+real,507
+lsel,s,loc,x,0
+lsel,r,loc,y,dspace+df_center/2
+lsel,r,loc,z,0
+lmesh,all                                        
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,dspace,0)
+type,31
+mat,17
+real,512
+e,nodeNo1,nodeNo2                     
+type,34
+real,507
+mat,7
+e,nodeNo1,nodeNo2            
+-------center bottom wall-------------------------------
+l,kp_12,kp_13,num_center_floor      !center bottom floor
+type,33
+mat,2
+real,508
+lsel,s,loc,x,0
+lsel,r,loc,y,-dspace-df_center/2
+lsel,r,loc,z,0
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,-dspace,0)
+type,31
+mat,17
+real,513
+e,nodeNo1,nodeNo2                      
+type,34
+real,508
+mat,7
+e,nodeNo1,nodeNo2
+-----------------------------------------------------------------------------
+-------------model geometries------------------
+-------------bottom room-----------------------
+csys,0
+Xcenter_center=0
+Ycenter_center=-dspace-df_center-dspace
+Zcenter_center=0
+clocal,11,0,Xcenter_center,Ycenter_center,Zcenter_center
+csys,11
+wpcsys,1,11
+------------key points------------------------
+kp_1=601
+kp_2=602
+kp_3=603
+kp_4=604
+kp_5=605
+kp_6=606
+kp_7=607
+kp_8=608
+kp_9=609
+kp_10=610
+kp_11=611
+kp_12=612
+kp_13=613
+
+k,kp_1,0,0,0                                !point for center room
+k,kp_2,0,0,dspace                           !front wall
+k,kp_3,0,0,dspace+dw_center_front
+k,kp_4,0,0,-dspace                          !back wall
+k,kp_5,0,0,-dspace-dw_center_back
+k,kp_6,-dspace,0,0                          !left wall
+k,kp_7,-dspace-dw_center_left,0,0
+k,kp_8,dspace,0,0                           !right wall
+k,kp_9,dspace+dw_center_right,0,0
+k,kp_10,0,dspace,0                          !top wall
+k,kp_11,0,dspace+df_center,0
+k,kp_12,0,-dspace,0                         !bottom wall
+k,kp_13,0,-dspace-df_center,0
+-----------gas volume-------------------------
+type,71
+mat,6
+real,602
+kmesh,kp_1
+-------center front wall-------------------------------
+l,kp_2,kp_3,numw_center_front 
+type,33
+mat,1
+real,603
+lsel,s,loc,x,0
+lsel,r,loc,y,0
+lsel,r,loc,z,dspace+dw_center_front/2
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,0,dspace)
+type,31
+mat,16
+real,608
+e,nodeNo1,nodeNo2                   
+type,34
+real,603
+mat,7
+e,nodeNo1,nodeNo2
+-------center back wall-------------------------------
+l,kp_4,kp_5,numw_center_back      
+type,33
+mat,1
+real,604
+lsel,s,loc,x,0
+lsel,r,loc,y,0
+lsel,r,loc,z,-dspace-dw_center_back/2
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,0,-dspace)
+type,31
+mat,16
+real,609
+e,nodeNo1,nodeNo2                      
+type,34
+real,604
+mat,7
+e,nodeNo1,nodeNo2
+-------center left wall-------------------------------
+l,kp_6,kp_7,numw_center_left 
+type,33
+mat,1
+real,605
+lsel,s,loc,x,-dspace-dw_center_left/2
+lsel,r,loc,y,0
+lsel,r,loc,z,0
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(-dspace,0,0)
+type,31
+mat,16
+real,610
+e,nodeNo1,nodeNo2                     
+type,34
+real,605
+mat,7
+e,nodeNo1,nodeNo2 
+-------center right wall-------------------------------
+l,kp_8,kp_9,numw_center_right      
+type,33
+mat,1
+real,606
+lsel,s,loc,x,dspace+dw_center_right/2
+lsel,r,loc,y,0
+lsel,r,loc,z,0
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(dspace,0,0)
+type,31
+mat,16
+real,611
+e,nodeNo1,nodeNo2                     
+type,34
+real,606
+mat,7
+e,nodeNo1,nodeNo2             
+-------center top wall-------------------------------
+l,kp_10,kp_11,num_center_floor        !center top floor
+type,33
+mat,2
+real,607
+lsel,s,loc,x,0
+lsel,r,loc,y,dspace+df_center/2
+lsel,r,loc,z,0
+lmesh,all                                        
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,dspace,0)
+type,31
+mat,17
+real,612
+e,nodeNo1,nodeNo2                     
+type,34
+real,607
+mat,7
+e,nodeNo1,nodeNo2            
+-------center bottom wall-------------------------------
+l,kp_12,kp_13,num_center_floor      !center bottom floor
+type,33
+mat,2
+real,608
+lsel,s,loc,x,0
+lsel,r,loc,y,-dspace-df_center/2
+lsel,r,loc,z,0
+lmesh,all                                          
+nodeNo1=node(0,0,0)
+nodeNo2=node(0,-dspace,0)
+type,31
+mat,17
+real,613
+e,nodeNo1,nodeNo2                      
+type,34
+real,608
+mat,7
+e,nodeNo1,nodeNo2
