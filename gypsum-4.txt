@@ -138,6 +138,142 @@ cp=0.187*(temps+273)+952
 mptemp,i,temps
 mpdata,hf,9,i,0.5*Ao_center*(Ho_center)**(1/2)*cp/Ao_center
 *enddo
+--------------front room --------------------
+--------------geometry------------------------
+W_front=10                                   !room width, m
+D_front=7                                    !room depth, m
+H_front=3.8                                  !room height, m
+Vr_front=W_front*D_front*H_front          !room volume, m3
+Af_front=W_front*D_front                   !floor area, m2
+Wo_front=6                                   !open width, m, front wall
+Ho_front=1.5                                 !open height, m, front wall
+Ao_front=Wo_front*Ho_front                 !open area, m2
+Aw_front_front=W_front*H_front-Ao_front        !front wall, m2
+Aw_front_back=W_front*H_front                  !back wall, m2
+Aw_front_left=D_front*H_front                  !left wall, m2
+Aw_front_right=D_front*H_front                  !right wall, m2
+At_front=Aw_front_front+Aw_front_back+Aw_front_left+Aw_front_right+2*Af_front         !total area not inclue open, m2
+emisr_front=1-exp(-1.1*H_front)             !gas emissivity
+--------------HRR----------------------------
+alpha_front=1000/300/300*1000                       !fire factor, W/s2
+qf_front=600e6                                      !fire load per unit floor area, J/m2
+qfuelmax_front=250e3                                !fuel controlled max HRRPUA, W/m2
+Qmaxfuel_front=qfuelmax_front*Af_front            !fuel controlled max HRR, W
+Qmaxopen_front=1500*Ao_front*Ho_front**(1/2)*1000 !open controlled max HRR, W
+Qmax_front=Qmaxopen_front
+!Qmax_front=min(Qmaxfuel_front,Qmaxopen_front)    !max HRR
+t1_front=(Qmax_front/alpha_front)**(1/2)          !develop duration, s
+Q1_front=1/3*Qmax_front*t1_front                  !Heat cnsumed in developng stage, W
+t2_front=(0.7*qf_front*Af_front-Q1_front)/Qmax_front          !steady duration, s
+t3_front=0.6*qf_front*Af_front/Qmax_front        !decay duration,s
+*dim,HRR_front,table,3601,1,,time
+*do,i,1,3601
+HRR_front(i,0)=(i-1)*10
+*if,10*(i-1),le,t1_front,then
+HRR_front(i,1)=alpha_front*100*(i-1)*(i-1)
+*elseif,10*(i-1),le,t1_front+t2_front
+HRR_front(i,1)=Qmax_front
+*else
+HRR_front(i,1)=max(0,Qmax_front/t3_front*(t1_front+t2_front+t3_front-10*(i-1)))
+*endif
+*enddo
+----------------division of walls and floors--------------
+dw_front_front=100/1000                           !front wall thickness,m
+dw_front_back=100/1000                           !back wall thickness,m
+dw_front_left=100/1000                           !left wall thickness,m
+dw_front_right=100/1000                           !right wall thickness,m
+numw_front_front=nint(dw_front_front/delta_gypsum)
+numw_front_back=nint(dw_front_back/delta_gypsum)
+numw_front_left=nint(dw_front_left/delta_gypsum)
+numw_front_right=nint(dw_front_right/delta_gypsum)
+df_front=200/1000                           !floor thickness, m
+num_front_floor=nint(df_front/delta_NWC)
+-------------steel members----------------------
+bs_front=400/1000                           !steel section H400*400*13*21
+hs_front=400/1000
+tf_front=21/1000
+tw_front=13/1000
+di_front=10/1000                            !insulation thickness, m
+numi_front=nint(di_front/delta_SFRM)
+ls_front=H_front                           !steel length, m
+Vs_front=ls_front*(2*bs_front*tf_front+(hs_front-2*tf_front)*tw_front)    !steel volume, m3
+As_front=ls_front*(2*hs_front+4*bs_front-2*tw_front)
+-------------convection factor at opening-----------
+!mp,hf,14,0.5*Ao_front*(Ho_front)**(1/2)*c_air/Ao_front     !effective covection factor considering heat loss by gas exchange at opening
+*do,i,1,25
+temps=50*(i-1)
+cp=0.187*(temps+273)+952
+mptemp,i,temps
+mpdata,hf,14,i,0.5*Ao_front*(Ho_front)**(1/2)*cp/Ao_front
+*enddo
+--------------back room --------------------
+--------------geometry------------------------
+W_back=10                                   !room width, m
+D_back=7                                    !room depth, m
+H_back=3.8                                  !room height, m
+Vr_back=W_back*D_back*H_back                !room volume, m3
+Af_back=W_back*D_back                       !floor area, m2
+Wo_back=6                                   !open width, m, front wall
+Ho_back=1.5                                 !open height, m, front wall
+Ao_back=Wo_back*Ho_back                     !open area, m2
+Aw_back_front=W_back*H_back-Ao_back         !front wall, m2
+Aw_back_back=W_back*H_back                  !back wall, m2
+Aw_back_left=D_back*H_back                  !left wall, m2
+Aw_back_right=D_back*H_back                 !right wall, m2
+At_back=Aw_back_front+Aw_back_back+Aw_back_left+Aw_back_right+2*Af_back         !total area not inclue open, m2
+emisr_back=1-exp(-1.1*H_back)             !gas emissivity
+--------------HRR----------------------------
+alpha_back=1000/300/300*1000                       !fire factor, W/s2
+qf_back=600e6                                      !fire load per unit floor area, J/m2
+qfuelmax_back=250e3                                !fuel controlled max HRRPUA, W/m2
+Qmaxfuel_back=qfuelmax_back*Af_back            !fuel controlled max HRR, W
+Qmaxopen_back=1500*Ao_back*Ho_back**(1/2)*1000 !open controlled max HRR, W
+Qmax_back=Qmaxopen_back
+!Qmax_back=min(Qmaxfuel_back,Qmaxopen_back)    !max HRR
+t1_back=(Qmax_back/alpha_back)**(1/2)          !develop duration, s
+Q1_back=1/3*Qmax_back*t1_back                  !Heat cnsumed in developng stage, W
+t2_back=(0.7*qf_back*Af_back-Q1_back)/Qmax_back          !steady duration, s
+t3_back=0.6*qf_back*Af_back/Qmax_back        !decay duration,s
+*dim,HRR_back,table,3601,1,,time
+*do,i,1,3601
+HRR_back(i,0)=(i-1)*10
+*if,10*(i-1),le,t1_back,then
+HRR_back(i,1)=alpha_back*100*(i-1)*(i-1)
+*elseif,10*(i-1),le,t1_back+t2_back
+HRR_back(i,1)=Qmax_back
+*else
+HRR_back(i,1)=max(0,Qmax_back/t3_back*(t1_back+t2_back+t3_back-10*(i-1)))
+*endif
+*enddo
+----------------division of walls and floors--------------
+dw_back_front=100/1000                           !front wall thickness,m
+dw_back_back=100/1000                           !back wall thickness,m
+dw_back_left=100/1000                           !left wall thickness,m
+dw_back_right=100/1000                           !right wall thickness,m
+numw_back_front=nint(dw_back_front/delta_gypsum)
+numw_back_back=nint(dw_back_back/delta_gypsum)
+numw_back_left=nint(dw_back_left/delta_gypsum)
+numw_back_right=nint(dw_back_right/delta_gypsum)
+df_back=200/1000                           !floor thickness, m
+num_back_floor=nint(df_back/delta_NWC)
+-------------steel members----------------------
+bs_back=400/1000                           !steel section H400*400*13*21
+hs_back=400/1000
+tf_back=21/1000
+tw_back=13/1000
+di_back=10/1000                            !insulation thickness, m
+numi_back=nint(di_back/delta_SFRM)
+ls_back=H_back                           !steel length, m
+Vs_back=ls_back*(2*bs_back*tf_back+(hs_back-2*tf_back)*tw_back)    !steel volume, m3
+As_back=ls_back*(2*hs_back+4*bs_back-2*tw_back)
+-------------convection factor at opening-----------
+!mp,hf,15,0.5*Ao_back*(Ho_back)**(1/2)*c_air/Ao_back     !effective covection factor considering heat loss by gas exchange at opening
+*do,i,1,25
+temps=50*(i-1)
+cp=0.187*(temps+273)+952
+mptemp,i,temps
+mpdata,hf,15,i,0.5*Ao_back*(Ho_back)**(1/2)*cp/Ao_back
+*enddo
 --------------left room ----------------------
 --------------geometry------------------------
 W_left=10                                   !room width, m
@@ -410,174 +546,37 @@ cp=0.187*(temps+273)+952
 mptemp,i,temps
 mpdata,hf,13,i,0.5*Ao_bottom*(Ho_bottom)**(1/2)*cp/Ao_bottom
 *enddo
---------------front room --------------------
---------------geometry------------------------
-W_front=10                                   !room width, m
-D_front=7                                    !room depth, m
-H_front=3.8                                  !room height, m
-Vr_front=W_front*D_front*H_front          !room volume, m3
-Af_front=W_front*D_front                   !floor area, m2
-Wo_front=6                                   !open width, m, front wall
-Ho_front=1.5                                 !open height, m, front wall
-Ao_front=Wo_front*Ho_front                 !open area, m2
-Aw_front_front=W_front*H_front-Ao_front        !front wall, m2
-Aw_front_back=W_front*H_front                  !back wall, m2
-Aw_front_left=D_front*H_front                  !left wall, m2
-Aw_front_right=D_front*H_front                  !right wall, m2
-At_front=Aw_front_front+Aw_front_back+Aw_front_left+Aw_front_right+2*Af_front         !total area not inclue open, m2
-emisr_front=1-exp(-1.1*H_front)             !gas emissivity
---------------HRR----------------------------
-alpha_front=1000/300/300*1000                       !fire factor, W/s2
-qf_front=600e6                                      !fire load per unit floor area, J/m2
-qfuelmax_front=250e3                                !fuel controlled max HRRPUA, W/m2
-Qmaxfuel_front=qfuelmax_front*Af_front            !fuel controlled max HRR, W
-Qmaxopen_front=1500*Ao_front*Ho_front**(1/2)*1000 !open controlled max HRR, W
-Qmax_front=Qmaxopen_front
-!Qmax_front=min(Qmaxfuel_front,Qmaxopen_front)    !max HRR
-t1_front=(Qmax_front/alpha_front)**(1/2)          !develop duration, s
-Q1_front=1/3*Qmax_front*t1_front                  !Heat cnsumed in developng stage, W
-t2_front=(0.7*qf_front*Af_front-Q1_front)/Qmax_front          !steady duration, s
-t3_front=0.6*qf_front*Af_front/Qmax_front        !decay duration,s
-*dim,HRR_front,table,3601,1,,time
-*do,i,1,3601
-HRR_front(i,0)=(i-1)*10
-*if,10*(i-1),le,t1_front,then
-HRR_front(i,1)=alpha_front*100*(i-1)*(i-1)
-*elseif,10*(i-1),le,t1_front+t2_front
-HRR_front(i,1)=Qmax_front
-*else
-HRR_front(i,1)=max(0,Qmax_front/t3_front*(t1_front+t2_front+t3_front-10*(i-1)))
-*endif
-*enddo
-----------------division of walls and floors--------------
-dw_front_front=100/1000                           !front wall thickness,m
-dw_front_back=100/1000                           !back wall thickness,m
-dw_front_left=100/1000                           !left wall thickness,m
-dw_front_right=100/1000                           !right wall thickness,m
-numw_front_front=nint(dw_front_front/delta_gypsum)
-numw_front_back=nint(dw_front_back/delta_gypsum)
-numw_front_left=nint(dw_front_left/delta_gypsum)
-numw_front_right=nint(dw_front_right/delta_gypsum)
-df_front=200/1000                           !floor thickness, m
-num_front_floor=nint(df_front/delta_NWC)
--------------steel members----------------------
-bs_front=400/1000                           !steel section H400*400*13*21
-hs_front=400/1000
-tf_front=21/1000
-tw_front=13/1000
-di_front=10/1000                            !insulation thickness, m
-numi_front=nint(di_front/delta_SFRM)
-ls_front=H_front                           !steel length, m
-Vs_front=ls_front*(2*bs_front*tf_front+(hs_front-2*tf_front)*tw_front)    !steel volume, m3
-As_front=ls_front*(2*hs_front+4*bs_front-2*tw_front)
--------------convection factor at opening-----------
-!mp,hf,14,0.5*Ao_front*(Ho_front)**(1/2)*c_air/Ao_front     !effective covection factor considering heat loss by gas exchange at opening
-*do,i,1,25
-temps=50*(i-1)
-cp=0.187*(temps+273)+952
-mptemp,i,temps
-mpdata,hf,14,i,0.5*Ao_front*(Ho_front)**(1/2)*cp/Ao_front
-*enddo
---------------back room --------------------
---------------geometry------------------------
-W_back=10                                   !room width, m
-D_back=7                                    !room depth, m
-H_back=3.8                                  !room height, m
-Vr_back=W_back*D_back*H_back                !room volume, m3
-Af_back=W_back*D_back                       !floor area, m2
-Wo_back=6                                   !open width, m, front wall
-Ho_back=1.5                                 !open height, m, front wall
-Ao_back=Wo_back*Ho_back                     !open area, m2
-Aw_back_front=W_back*H_back-Ao_back         !front wall, m2
-Aw_back_back=W_back*H_back                  !back wall, m2
-Aw_back_left=D_back*H_back                  !left wall, m2
-Aw_back_right=D_back*H_back                 !right wall, m2
-At_back=Aw_back_front+Aw_back_back+Aw_back_left+Aw_back_right+2*Af_back         !total area not inclue open, m2
-emisr_back=1-exp(-1.1*H_back)             !gas emissivity
---------------HRR----------------------------
-alpha_back=1000/300/300*1000                       !fire factor, W/s2
-qf_back=600e6                                      !fire load per unit floor area, J/m2
-qfuelmax_back=250e3                                !fuel controlled max HRRPUA, W/m2
-Qmaxfuel_back=qfuelmax_back*Af_back            !fuel controlled max HRR, W
-Qmaxopen_back=1500*Ao_back*Ho_back**(1/2)*1000 !open controlled max HRR, W
-Qmax_back=Qmaxopen_back
-!Qmax_back=min(Qmaxfuel_back,Qmaxopen_back)    !max HRR
-t1_back=(Qmax_back/alpha_back)**(1/2)          !develop duration, s
-Q1_back=1/3*Qmax_back*t1_back                  !Heat cnsumed in developng stage, W
-t2_back=(0.7*qf_back*Af_back-Q1_back)/Qmax_back          !steady duration, s
-t3_back=0.6*qf_back*Af_back/Qmax_back        !decay duration,s
-*dim,HRR_back,table,3601,1,,time
-*do,i,1,3601
-HRR_back(i,0)=(i-1)*10
-*if,10*(i-1),le,t1_back,then
-HRR_back(i,1)=alpha_back*100*(i-1)*(i-1)
-*elseif,10*(i-1),le,t1_back+t2_back
-HRR_back(i,1)=Qmax_back
-*else
-HRR_back(i,1)=max(0,Qmax_back/t3_back*(t1_back+t2_back+t3_back-10*(i-1)))
-*endif
-*enddo
-----------------division of walls and floors--------------
-dw_back_front=100/1000                           !front wall thickness,m
-dw_back_back=100/1000                           !back wall thickness,m
-dw_back_left=100/1000                           !left wall thickness,m
-dw_back_right=100/1000                           !right wall thickness,m
-numw_back_front=nint(dw_back_front/delta_gypsum)
-numw_back_back=nint(dw_back_back/delta_gypsum)
-numw_back_left=nint(dw_back_left/delta_gypsum)
-numw_back_right=nint(dw_back_right/delta_gypsum)
-df_back=200/1000                           !floor thickness, m
-num_back_floor=nint(df_back/delta_NWC)
--------------steel members----------------------
-bs_back=400/1000                           !steel section H400*400*13*21
-hs_back=400/1000
-tf_back=21/1000
-tw_back=13/1000
-di_back=10/1000                            !insulation thickness, m
-numi_back=nint(di_back/delta_SFRM)
-ls_back=H_back                           !steel length, m
-Vs_back=ls_back*(2*bs_back*tf_back+(hs_back-2*tf_back)*tw_back)    !steel volume, m3
-As_back=ls_back*(2*hs_back+4*bs_back-2*tw_back)
--------------convection factor at opening-----------
-!mp,hf,15,0.5*Ao_back*(Ho_back)**(1/2)*c_air/Ao_back     !effective covection factor considering heat loss by gas exchange at opening
-*do,i,1,25
-temps=50*(i-1)
-cp=0.187*(temps+273)+952
-mptemp,i,temps
-mpdata,hf,15,i,0.5*Ao_back*(Ho_back)**(1/2)*cp/Ao_back
-*enddo
 --------------------------------------------------------
 -------------emissivity at fire exposed surface---------
-mp,emis,16,emisr_center*emis_gypsum
+mp,emis,16,emisr_center*emis_gypsum  !emissivity of fire exposed gypsum for the center room
 mp,emis,17,emisr_center*emis_NWC
-mp,emis,18,emisr_left*emis_gypsum
-mp,emis,19,emisr_left*emis_NWC
-mp,emis,20,emisr_right*emis_gypsum
-mp,emis,21,emisr_right*emis_NWC
-mp,emis,22,emisr_top*emis_gypsum
-mp,emis,23,emisr_top*emis_NWC
-mp,emis,24,emisr_bottom*emis_gypsum
-mp,emis,25,emisr_bottom*emis_NWC
-mp,emis,26,emisr_front*emis_gypsum
-mp,emis,27,emisr_front*emis_NWC
-mp,emis,28,emisr_back*emis_gypsum
-mp,emis,29,emisr_back*emis_NWC
-mp,emis,30,emisr_center
+mp,emis,18,emisr_front*emis_gypsum
+mp,emis,19,emisr_front*emis_NWC
+mp,emis,20,emisr_back*emis_gypsum
+mp,emis,21,emisr_back*emis_NWC
+mp,emis,22,emisr_left*emis_gypsum
+mp,emis,23,emisr_left*emis_NWC
+mp,emis,24,emisr_right*emis_gypsum
+mp,emis,25,emisr_right*emis_NWC
+mp,emis,26,emisr_top*emis_gypsum
+mp,emis,27,emisr_top*emis_NWC
+mp,emis,28,emisr_bottom*emis_gypsum
+mp,emis,29,emisr_bottom*emis_NWC
+mp,emis,30,emisr_center                !emissivity of the center room
 mp,emis,31,emisr_front
 mp,emis,32,emisr_back
 mp,emis,33,emisr_left
 mp,emis,34,emisr_right
 mp,emis,35,emisr_top
 mp,emis,36,emisr_bottom
-mp,emis,37,emis_gypsum
+mp,emis,37,emis_gypsum                 !emissivity of ambient exposed gypsum
 mp,emis,38,emis_NWC
-
--------------------------------------------------
-------------real constants-----------------------
-------------HRR link-----------------------------
+-------------------------------------------------------
+------------real constants-----------------------------
+------------HRR link-----------------------------------
 dspace=df_center/5              !arbitrary distance
 r,1,1/dspace/(3**0.5)           !link33, HRR
------------cetner room------------------------------------------------------
+-----------cetner room---------------------------------
 -----------gas volumes---------------------------
 r,2,Vr_center                   !mass71, gas center room
 -----------boundaries----------------------------
@@ -613,23 +612,23 @@ r,104,Aw_front_back                                     !back wall,conduction
 r,105,Aw_front_left                                     !left wall,conduction
 r,106,Aw_front_right                                    !right wall,conduction
 r,107,Af_front                                          !floor,conduction
-r,108,Aw_front_front,1,emisr_front*emis_gypsum,stef    !front wall, fire exposed
-r,109,Aw_front_back,1,emisr_front*emis_gypsum,stef     !back wall, fire exposed
-r,110,Aw_front_left,1,emisr_front*emis_gypsum,stef    !left wall, fire exposed
-r,111,Aw_front_right,1,emisr_front*emis_gypsum,stef   !right wall, fire exposed
-r,112,Af_front,1,emisr_front*emis_NWC,stef            !floor, fire exposed
-r,113,Aw_front_front,1,emis_gypsum,stef                !front wall, air exposed
-r,114,Aw_front_back,1,emis_gypsum,stef                 !back wall, air exposed
-r,115,Aw_front_left,1,emis_gypsum,stef                 !left wall, air exposed
-r,116,Aw_front_right,1,emis_gypsum,stef                !right wall, air exposed
-r,117,Af_front,1,emis_NWC,stef                         !floor, air exposed
+r,108,Aw_front_front,1,emisr_front*emis_gypsum,stef     !front wall, fire exposed
+r,109,Aw_front_back,1,emisr_front*emis_gypsum,stef      !back wall, fire exposed
+r,110,Aw_front_left,1,emisr_front*emis_gypsum,stef      !left wall, fire exposed
+r,111,Aw_front_right,1,emisr_front*emis_gypsum,stef     !right wall, fire exposed
+r,112,Af_front,1,emisr_front*emis_NWC,stef              !floor, fire exposed
+r,113,Aw_front_front,1,emis_gypsum,stef                 !front wall, air exposed
+r,114,Aw_front_back,1,emis_gypsum,stef                  !back wall, air exposed
+r,115,Aw_front_left,1,emis_gypsum,stef                  !left wall, air exposed
+r,116,Aw_front_right,1,emis_gypsum,stef                 !right wall, air exposed
+r,117,Af_front,1,emis_NWC,stef                          !floor, air exposed
 -----------openings----------------------------
 r,118,Ao_front                                          !opening, convection
-r,119,Ao_front,1,emisr_front,stef                      !opening, radiation
+r,119,Ao_front,1,emisr_front,stef                       !opening, radiation
 ----------steels-------------------------------
 r,120,Vs_front                                          !steel volume
 r,121,As_front                                          !steel, conduction
-r,122,As_front,1,emisr_front*emis_steel,stef           !steel, radiation
+r,122,As_front,1,emisr_front*emis_steel,stef            !steel, radiation
 -----------------------------------------------------------------------------
 -----------back room---------------------------
 -----------gas volumes---------------------------
@@ -640,23 +639,23 @@ r,204,Aw_back_back                                     !back wall,conduction
 r,205,Aw_back_left                                     !left wall,conduction
 r,206,Aw_back_right                                    !right wall,conduction
 r,207,Af_back                                          !floor,conduction
-r,208,Aw_back_front,1,emisr_back*emis_gypsum,stef    !front wall, fire exposed
-r,209,Aw_back_back,1,emisr_back*emis_gypsum,stef     !back wall, fire exposed
-r,210,Aw_back_left,1,emisr_back*emis_gypsum,stef    !left wall, fire exposed
-r,211,Aw_back_right,1,emisr_back*emis_gypsum,stef   !right wall, fire exposed
-r,212,Af_back,1,emisr_back*emis_NWC,stef            !floor, fire exposed
-r,213,Aw_back_front,1,emis_gypsum,stef                !front wall, air exposed
-r,214,Aw_back_back,1,emis_gypsum,stef                 !back wall, air exposed
-r,215,Aw_back_left,1,emis_gypsum,stef                 !left wall, air exposed
-r,216,Aw_back_right,1,emis_gypsum,stef                !right wall, air exposed
-r,217,Af_back,1,emis_NWC,stef                         !floor, air exposed
+r,208,Aw_back_front,1,emisr_back*emis_gypsum,stef      !front wall, fire exposed
+r,209,Aw_back_back,1,emisr_back*emis_gypsum,stef       !back wall, fire exposed
+r,210,Aw_back_left,1,emisr_back*emis_gypsum,stef       !left wall, fire exposed
+r,211,Aw_back_right,1,emisr_back*emis_gypsum,stef      !right wall, fire exposed
+r,212,Af_back,1,emisr_back*emis_NWC,stef               !floor, fire exposed
+r,213,Aw_back_front,1,emis_gypsum,stef                 !front wall, air exposed
+r,214,Aw_back_back,1,emis_gypsum,stef                  !back wall, air exposed
+r,215,Aw_back_left,1,emis_gypsum,stef                  !left wall, air exposed
+r,216,Aw_back_right,1,emis_gypsum,stef                 !right wall, air exposed
+r,217,Af_back,1,emis_NWC,stef                          !floor, air exposed
 -----------openings----------------------------
 r,218,Ao_back                                          !opening, convection
-r,219,Ao_back,1,emisr_back,stef                      !opening, radiation
+r,219,Ao_back,1,emisr_back,stef                        !opening, radiation
 ----------steels-------------------------------
 r,220,Vs_back                                          !steel volume
 r,221,As_back                                          !steel, conduction
-r,222,As_back,1,emisr_back*emis_steel,stef           !steel, radiation
+r,222,As_back,1,emisr_back*emis_steel,stef             !steel, radiation
 -----------------------------------------------------------------------------
 -----------left room---------------------------
 -----------gas volumes---------------------------
@@ -668,11 +667,11 @@ r,305,Aw_left_left                                     !left wall,conduction
 r,306,Aw_left_right                                    !right wall,conduction
 r,307,Af_left                                          !floor,conduction
 
-r,308,Aw_left_front,1,emisr_left*emis_gypsum,stef    !front wall, fire exposed
-r,309,Aw_left_back,1,emisr_left*emis_gypsum,stef     !back wall, fire exposed
-r,310,Aw_left_left,1,emisr_left*emis_gypsum,stef    !left wall, fire exposed
-r,311,Aw_left_right,1,emisr_left*emis_gypsum,stef   !right wall, fire exposed
-r,312,Af_left,1,emisr_left*emis_NWC,stef            !floor, fire exposed
+r,308,Aw_left_front,1,emisr_left*emis_gypsum,stef     !front wall, fire exposed
+r,309,Aw_left_back,1,emisr_left*emis_gypsum,stef      !back wall, fire exposed
+r,310,Aw_left_left,1,emisr_left*emis_gypsum,stef      !left wall, fire exposed
+r,311,Aw_left_right,1,emisr_left*emis_gypsum,stef     !right wall, fire exposed
+r,312,Af_left,1,emisr_left*emis_NWC,stef              !floor, fire exposed
 
 r,313,Aw_left_front,1,emis_gypsum,stef                !front wall, air exposed
 r,314,Aw_left_back,1,emis_gypsum,stef                 !back wall, air exposed
@@ -680,41 +679,41 @@ r,315,Aw_left_left,1,emis_gypsum,stef                 !left wall, air exposed
 r,316,Aw_left_right,1,emis_gypsum,stef                !right wall, air exposed
 r,317,Af_left,1,emis_NWC,stef                         !floor, air exposed
 -----------openings----------------------------
-r,318,Ao_left                                          !opening, convection
-r,319,Ao_left,1,emisr_left,stef                      !opening, radiation
+r,318,Ao_left                                         !opening, convection
+r,319,Ao_left,1,emisr_left,stef                       !opening, radiation
 ----------steels-------------------------------
-r,320,Vs_left                                          !steel volume
-r,321,As_left                                          !steel, conduction
-r,322,As_left,1,emisr_left*emis_steel,stef           !steel, radiation
+r,320,Vs_left                                         !steel volume
+r,321,As_left                                         !steel, conduction
+r,322,As_left,1,emisr_left*emis_steel,stef            !steel, radiation
 -----------------------------------------------------------------------------
 -----------right room---------------------------
 -----------gas volumes---------------------------
 r,402,Vr_right                   !mass71, gas center room
 -----------boundaries----------------------------
-r,403,Aw_right_front                                    !front wall,conduction
-r,404,Aw_right_back                                     !back wall,conduction
-r,405,Aw_right_left                                     !left wall,conduction
-r,406,Aw_right_right                                    !right wall,conduction
-r,407,Af_right                                          !floor,conduction
+r,403,Aw_right_front                                  !front wall,conduction
+r,404,Aw_right_back                                   !back wall,conduction
+r,405,Aw_right_left                                   !left wall,conduction
+r,406,Aw_right_right                                  !right wall,conduction
+r,407,Af_right                                        !floor,conduction
 
-r,408,Aw_right_front,1,emisr_right*emis_gypsum,stef    !front wall, fire exposed
-r,409,Aw_right_back,1,emisr_right*emis_gypsum,stef     !back wall, fire exposed
-r,410,Aw_right_left,1,emisr_left*emis_gypsum,stef    !left wall, fire exposed
+r,408,Aw_right_front,1,emisr_right*emis_gypsum,stef   !front wall, fire exposed
+r,409,Aw_right_back,1,emisr_right*emis_gypsum,stef    !back wall, fire exposed
+r,410,Aw_right_left,1,emisr_left*emis_gypsum,stef     !left wall, fire exposed
 r,411,Aw_right_right,1,emisr_right*emis_gypsum,stef   !right wall, fire exposed
 r,412,Af_right,1,emisr_right*emis_NWC,stef            !floor, fire exposed
 
-r,413,Aw_right_front,1,emis_gypsum,stef                !front wall, air exposed
-r,414,Aw_right_back,1,emis_gypsum,stef                 !back wall, air exposed
-r,415,Aw_right_left,1,emis_gypsum,stef                 !left wall, air exposed
-r,416,Aw_right_right,1,emis_gypsum,stef                !right wall, air exposed
-r,417,Af_right,1,emis_NWC,stef                         !floor, air exposed
+r,413,Aw_right_front,1,emis_gypsum,stef               !front wall, air exposed
+r,414,Aw_right_back,1,emis_gypsum,stef                !back wall, air exposed
+r,415,Aw_right_left,1,emis_gypsum,stef                !left wall, air exposed
+r,416,Aw_right_right,1,emis_gypsum,stef               !right wall, air exposed
+r,417,Af_right,1,emis_NWC,stef                        !floor, air exposed
 -----------openings----------------------------
-r,418,Ao_right                                          !opening, convection
-r,419,Ao_right,1,emisr_right,stef                      !opening, radiation
+r,418,Ao_right                                        !opening, convection
+r,419,Ao_right,1,emisr_right,stef                     !opening, radiation
 ----------steels-------------------------------
-r,420,Vs_right                                          !steel volume
-r,421,As_right                                          !steel, conduction
-r,422,As_right,1,emisr_right*emis_steel,stef           !steel, radiation
+r,420,Vs_right                                        !steel volume
+r,421,As_right                                        !steel, conduction
+r,422,As_right,1,emisr_right*emis_steel,stef          !steel, radiation
 ----------------------------------------------------------------------------
 -----------cetner room---------------------------
 -----------gas volumes---------------------------
@@ -725,35 +724,35 @@ r,504,Aw_top_back                                     !back wall,conduction
 r,505,Aw_top_left                                     !left wall,conduction
 r,506,Aw_top_right                                    !right wall,conduction
 r,507,Af_top                                          !floor,conduction
-r,508,Aw_top_front,1,emisr_top*emis_gypsum,stef    !front wall, fire exposed
-r,509,Aw_top_back,1,emisr_top*emis_gypsum,stef     !back wall, fire exposed
-r,510,Aw_top_left,1,emisr_top*emis_gypsum,stef    !left wall, fire exposed
-r,511,Aw_top_right,1,emisr_top*emis_gypsum,stef   !right wall, fire exposed
-r,512,Af_top,1,emisr_top*emis_NWC,stef            !floor, fire exposed
-r,513,Aw_top_front,1,emis_gypsum,stef                !front wall, air exposed
-r,514,Aw_top_back,1,emis_gypsum,stef                 !back wall, air exposed
-r,515,Aw_top_left,1,emis_gypsum,stef                 !left wall, air exposed
-r,516,Aw_top_right,1,emis_gypsum,stef                !right wall, air exposed
-r,517,Af_top,1,emis_NWC,stef                         !floor, air exposed
+r,508,Aw_top_front,1,emisr_top*emis_gypsum,stef       !front wall, fire exposed
+r,509,Aw_top_back,1,emisr_top*emis_gypsum,stef        !back wall, fire exposed
+r,510,Aw_top_left,1,emisr_top*emis_gypsum,stef        !left wall, fire exposed
+r,511,Aw_top_right,1,emisr_top*emis_gypsum,stef       !right wall, fire exposed
+r,512,Af_top,1,emisr_top*emis_NWC,stef                !floor, fire exposed
+r,513,Aw_top_front,1,emis_gypsum,stef                 !front wall, air exposed
+r,514,Aw_top_back,1,emis_gypsum,stef                  !back wall, air exposed
+r,515,Aw_top_left,1,emis_gypsum,stef                  !left wall, air exposed
+r,516,Aw_top_right,1,emis_gypsum,stef                 !right wall, air exposed
+r,517,Af_top,1,emis_NWC,stef                          !floor, air exposed
 -----------openings----------------------------
 r,518,Ao_top                                          !opening, convection
-r,519,Ao_top,1,emisr_top,stef                      !opening, radiation
+r,519,Ao_top,1,emisr_top,stef                         !opening, radiation
 ----------steels-------------------------------
 r,520,Vs_top                                          !steel volume
 r,521,As_top                                          !steel, conduction
-r,522,As_top,1,emisr_top*emis_steel,stef           !steel, radiation
+r,522,As_top,1,emisr_top*emis_steel,stef              !steel, radiation
 ----------------------------------------------------------------------------
 -----------bottom room---------------------------
 -----------gas volumes---------------------------
 r,602,Vr_bottom                   !mass71, gas center room
 -----------boundaries----------------------------
-r,603,Aw_bottom_front                                    !front wall,conduction
-r,604,Aw_bottom_back                                     !back wall,conduction
-r,605,Aw_bottom_left                                     !left wall,conduction
-r,606,Aw_bottom_right                                    !right wall,conduction
-r,607,Af_bottom                                          !floor,conduction
-r,608,Aw_bottom_front,1,emisr_bottom*emis_gypsum,stef    !front wall, fire exposed
-r,609,Aw_bottom_back,1,emisr_bottom*emis_gypsum,stef     !back wall, fire exposed
+r,603,Aw_bottom_front                                   !front wall,conduction
+r,604,Aw_bottom_back                                    !back wall,conduction
+r,605,Aw_bottom_left                                    !left wall,conduction
+r,606,Aw_bottom_right                                   !right wall,conduction
+r,607,Af_bottom                                         !floor,conduction
+r,608,Aw_bottom_front,1,emisr_bottom*emis_gypsum,stef   !front wall, fire exposed
+r,609,Aw_bottom_back,1,emisr_bottom*emis_gypsum,stef    !back wall, fire exposed
 r,610,Aw_bottom_left,1,emisr_bottom*emis_gypsum,stef    !left wall, fire exposed
 r,611,Aw_bottom_right,1,emisr_bottom*emis_gypsum,stef   !right wall, fire exposed
 r,612,Af_bottom,1,emisr_bottom*emis_NWC,stef            !floor, fire exposed
@@ -763,12 +762,12 @@ r,615,Aw_bottom_left,1,emis_gypsum,stef                 !left wall, air exposed
 r,616,Aw_bottom_right,1,emis_gypsum,stef                !right wall, air exposed
 r,617,Af_bottom,1,emis_NWC,stef                         !floor, air exposed
 -----------openings----------------------------
-r,618,Ao_bottom                                          !opening, convection
-r,619,Ao_bottom,1,emisr_bottom,stef                      !opening, radiation
+r,618,Ao_bottom                                         !opening, convection
+r,619,Ao_bottom,1,emisr_bottom,stef                     !opening, radiation
 ----------steels-------------------------------
-r,620,Vs_bottom                                          !steel volume
-r,621,As_bottom                                          !steel, conduction
-r,622,As_bottom,1,emisr_bottom*emis_steel,stef           !steel, radiation
+r,620,Vs_bottom                                         !steel volume
+r,621,As_bottom                                         !steel, conduction
+r,622,As_bottom,1,emisr_bottom*emis_steel,stef          !steel, radiation
 -----------------------------------------------------------------------------
 -------------model geometries------------------
 -------------center room-----------------------
@@ -793,8 +792,6 @@ kp_10=10                                     ! top floor, front point
 kp_11=11                                     ! top floor, back point
 kp_12=12                                     ! bottom floor, front point
 kp_13=13                                     ! bottom floor, back point
-kp_14=14                                     ! HRR point
-kp_15=15                                     ! opening point
 
 k,kp_1,0,0,0                                !point for center room
 k,kp_2,0,0,dspace                           !front wall
@@ -825,14 +822,13 @@ lsel,r,loc,z,dspace+dw_center_front/2
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,0,dspace)
+type,34
+mat,7
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,8
 e,nodeNo1,nodeNo2                   
-type,34
-real,3
-mat,7
-e,nodeNo1,nodeNo2
 -------center back wall-------------------------------
 l,kp_4,kp_5,numw_center_back      
 type,33
@@ -844,14 +840,13 @@ lsel,r,loc,z,-dspace-dw_center_back/2
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,0,-dspace)
+type,34
+mat,7
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,9
 e,nodeNo1,nodeNo2                      
-type,34
-real,4
-mat,7
-e,nodeNo1,nodeNo2
 -------center left wall-------------------------------
 l,kp_6,kp_7,numw_center_left 
 type,33
@@ -863,14 +858,13 @@ lsel,r,loc,z,0
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(-dspace,0,0)
+type,34
+mat,7
+e,nodeNo1,nodeNo2 
 type,31
 mat,16
 real,10
 e,nodeNo1,nodeNo2                     
-type,34
-real,5
-mat,7
-e,nodeNo1,nodeNo2 
 -------center right wall-------------------------------
 l,kp_8,kp_9,numw_center_right      
 type,33
@@ -882,14 +876,13 @@ lsel,r,loc,z,0
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(dspace,0,0)
+type,34
+mat,7
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,11
-e,nodeNo1,nodeNo2                     
-type,34
-real,6
-mat,7
-e,nodeNo1,nodeNo2             
+e,nodeNo1,nodeNo2                                 
 -------center top wall-------------------------------
 l,kp_10,kp_11,num_center_floor        !center top floor
 type,33
@@ -901,33 +894,52 @@ lsel,r,loc,z,0
 lmesh,all                                        
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,dspace,0)
+type,34
+mat,7
+e,nodeNo1,nodeNo2 
 type,31
 mat,17
 real,12
-e,nodeNo1,nodeNo2                     
-type,34
-real,7
-mat,7
-e,nodeNo1,nodeNo2            
+e,nodeNo1,nodeNo2                  
 -------center bottom wall-------------------------------
 l,kp_12,kp_13,num_center_floor      !center bottom floor
 type,33
 mat,2
-real,8
+real,7
 lsel,s,loc,x,0
 lsel,r,loc,y,-dspace-df_center/2
 lsel,r,loc,z,0
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,-dspace,0)
-type,31
-mat,17
-real,13
-e,nodeNo1,nodeNo2                      
 type,34
-real,8
 mat,7
 e,nodeNo1,nodeNo2
+type,31
+mat,17
+real,12
+e,nodeNo1,nodeNo2                      
+-----------HRR------------------------------------------
+*get,nodemax,node,,count
+n,nodemax+1,-dspace,-dspace,-dspace
+nodeNo3=node(-dspace,-dspace,-dspace)       !HRR source
+nodeNo1=node(0,0,0)
+type,33
+mat,5
+real,1
+e,nodeNo1,nodeNo3
+-----------outside-----------------------------------------
+n,nodemax+2,dspace,-dspace,-dspace
+nodeNo4=node(dspace,-dspace,-dspace)              !outside 
+nodeNo1=node(0,0,0)
+type,31
+mat,30
+real,19
+e,nodeNo1,nodeNo4
+type,34
+real,18
+mat,9
+e,nodeNo1,nodeNo4
 -----------------------------------------------------------------------------
 -------------model geometries------------------
 -------------front room-----------------------
@@ -982,14 +994,13 @@ lsel,r,loc,z,dspace+dw_center_front/2
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,0,dspace)
+type,34
+mat,8                                       !air exposed
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,108
 e,nodeNo1,nodeNo2                   
-type,34
-real,3
-mat,7
-e,nodeNo1,nodeNo2
 -------center back wall-------------------------------
 l,kp_4,kp_5,numw_center_back      
 type,33
@@ -1001,14 +1012,13 @@ lsel,r,loc,z,-dspace-dw_center_back/2
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,0,-dspace)
+type,34
+mat,8                                       !air exposed
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,109
 e,nodeNo1,nodeNo2                      
-type,34
-real,104
-mat,7
-e,nodeNo1,nodeNo2
 -------center left wall-------------------------------
 l,kp_6,kp_7,numw_center_left 
 type,33
@@ -1020,14 +1030,13 @@ lsel,r,loc,z,0
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(-dspace,0,0)
+type,34
+mat,8                                       !air exposed
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,110
-e,nodeNo1,nodeNo2                     
-type,34
-real,105
-mat,7
-e,nodeNo1,nodeNo2 
+e,nodeNo1,nodeNo2                  
 -------center right wall-------------------------------
 l,kp_8,kp_9,numw_center_right      
 type,33
@@ -1039,14 +1048,13 @@ lsel,r,loc,z,0
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(dspace,0,0)
+type,34
+mat,8                                       !air exposed
+e,nodeNo1,nodeNo2 
 type,31
 mat,16
 real,111
-e,nodeNo1,nodeNo2                     
-type,34
-real,106
-mat,7
-e,nodeNo1,nodeNo2             
+e,nodeNo1,nodeNo2                             
 -------center top wall-------------------------------
 l,kp_10,kp_11,num_center_floor        !center top floor
 type,33
@@ -1058,33 +1066,31 @@ lsel,r,loc,z,0
 lmesh,all                                        
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,dspace,0)
+type,34
+mat,8                                       !air exposed
+e,nodeNo1,nodeNo2
 type,31
 mat,17
 real,112
-e,nodeNo1,nodeNo2                     
-type,34
-real,107
-mat,7
-e,nodeNo1,nodeNo2            
+e,nodeNo1,nodeNo2                                 
 -------center bottom wall-------------------------------
 l,kp_12,kp_13,num_center_floor      !center bottom floor
 type,33
 mat,2
-real,108
+real,107
 lsel,s,loc,x,0
 lsel,r,loc,y,-dspace-df_center/2
 lsel,r,loc,z,0
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,-dspace,0)
+type,34
+mat,8                                       !air exposed
+e,nodeNo1,nodeNo2
 type,31
 mat,17
-real,113
+real,112
 e,nodeNo1,nodeNo2                      
-type,34
-real,108
-mat,7
-e,nodeNo1,nodeNo2
 -----------------------------------------------------------------------------
 -------------model geometries------------------
 -------------back room-----------------------
@@ -1139,14 +1145,13 @@ lsel,r,loc,z,dspace+dw_center_front/2
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,0,dspace)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,208
 e,nodeNo1,nodeNo2                   
-type,34
-real,203
-mat,7
-e,nodeNo1,nodeNo2
 -------center back wall-------------------------------
 l,kp_4,kp_5,numw_center_back      
 type,33
@@ -1158,14 +1163,13 @@ lsel,r,loc,z,-dspace-dw_center_back/2
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,0,-dspace)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,209
 e,nodeNo1,nodeNo2                      
-type,34
-real,204
-mat,7
-e,nodeNo1,nodeNo2
 -------center left wall-------------------------------
 l,kp_6,kp_7,numw_center_left 
 type,33
@@ -1177,14 +1181,13 @@ lsel,r,loc,z,0
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(-dspace,0,0)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,210
-e,nodeNo1,nodeNo2                     
-type,34
-real,205
-mat,7
-e,nodeNo1,nodeNo2 
+e,nodeNo1,nodeNo2                      
 -------center right wall-------------------------------
 l,kp_8,kp_9,numw_center_right      
 type,33
@@ -1196,14 +1199,13 @@ lsel,r,loc,z,0
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(dspace,0,0)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,211
-e,nodeNo1,nodeNo2                     
-type,34
-real,206
-mat,7
-e,nodeNo1,nodeNo2             
+e,nodeNo1,nodeNo2                                  
 -------center top wall-------------------------------
 l,kp_10,kp_11,num_center_floor        !center top floor
 type,33
@@ -1215,33 +1217,31 @@ lsel,r,loc,z,0
 lmesh,all                                        
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,dspace,0)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,17
 real,212
-e,nodeNo1,nodeNo2                     
-type,34
-real,207
-mat,7
-e,nodeNo1,nodeNo2            
+e,nodeNo1,nodeNo2                                 
 -------center bottom wall-------------------------------
 l,kp_12,kp_13,num_center_floor      !center bottom floor
 type,33
 mat,2
-real,208
+real,207
 lsel,s,loc,x,0
 lsel,r,loc,y,-dspace-df_center/2
 lsel,r,loc,z,0
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,-dspace,0)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,17
-real,213
+real,212
 e,nodeNo1,nodeNo2                      
-type,34
-real,208
-mat,7
-e,nodeNo1,nodeNo2
 -----------------------------------------------------------------------------
 -------------model geometries------------------
 -------------left room-----------------------
@@ -1296,14 +1296,13 @@ lsel,r,loc,z,dspace+dw_center_front/2
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,0,dspace)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,308
 e,nodeNo1,nodeNo2                   
-type,34
-real,303
-mat,7
-e,nodeNo1,nodeNo2
 -------center back wall-------------------------------
 l,kp_4,kp_5,numw_center_back      
 type,33
@@ -1315,14 +1314,13 @@ lsel,r,loc,z,-dspace-dw_center_back/2
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,0,-dspace)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,309
 e,nodeNo1,nodeNo2                      
-type,34
-real,304
-mat,7
-e,nodeNo1,nodeNo2
 -------center left wall-------------------------------
 l,kp_6,kp_7,numw_center_left 
 type,33
@@ -1334,14 +1332,13 @@ lsel,r,loc,z,0
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(-dspace,0,0)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,310
-e,nodeNo1,nodeNo2                     
-type,34
-real,305
-mat,7
-e,nodeNo1,nodeNo2 
+e,nodeNo1,nodeNo2                      
 -------center right wall-------------------------------
 l,kp_8,kp_9,numw_center_right      
 type,33
@@ -1353,14 +1350,13 @@ lsel,r,loc,z,0
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(dspace,0,0)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,311
-e,nodeNo1,nodeNo2                     
-type,34
-real,306
-mat,7
-e,nodeNo1,nodeNo2             
+e,nodeNo1,nodeNo2                                  
 -------center top wall-------------------------------
 l,kp_10,kp_11,num_center_floor        !center top floor
 type,33
@@ -1372,33 +1368,31 @@ lsel,r,loc,z,0
 lmesh,all                                        
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,dspace,0)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,17
 real,312
-e,nodeNo1,nodeNo2                     
-type,34
-real,307
-mat,7
-e,nodeNo1,nodeNo2            
+e,nodeNo1,nodeNo2                                 
 -------center bottom wall-------------------------------
 l,kp_12,kp_13,num_center_floor      !center bottom floor
 type,33
 mat,2
-real,308
+real,307
 lsel,s,loc,x,0
 lsel,r,loc,y,-dspace-df_center/2
 lsel,r,loc,z,0
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,-dspace,0)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,17
-real,313
+real,312
 e,nodeNo1,nodeNo2                      
-type,34
-real,308
-mat,7
-e,nodeNo1,nodeNo2
 -----------------------------------------------------------------------------
 -------------model geometries------------------
 -------------right room-----------------------
@@ -1453,14 +1447,13 @@ lsel,r,loc,z,dspace+dw_center_front/2
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,0,dspace)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,408
 e,nodeNo1,nodeNo2                   
-type,34
-real,403
-mat,7
-e,nodeNo1,nodeNo2
 -------center back wall-------------------------------
 l,kp_4,kp_5,numw_center_back      
 type,33
@@ -1472,14 +1465,13 @@ lsel,r,loc,z,-dspace-dw_center_back/2
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,0,-dspace)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,409
 e,nodeNo1,nodeNo2                      
-type,34
-real,404
-mat,7
-e,nodeNo1,nodeNo2
 -------center left wall-------------------------------
 l,kp_6,kp_7,numw_center_left 
 type,33
@@ -1491,14 +1483,13 @@ lsel,r,loc,z,0
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(-dspace,0,0)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,410
-e,nodeNo1,nodeNo2                     
-type,34
-real,405
-mat,7
-e,nodeNo1,nodeNo2 
+e,nodeNo1,nodeNo2                      
 -------center right wall-------------------------------
 l,kp_8,kp_9,numw_center_right      
 type,33
@@ -1510,14 +1501,13 @@ lsel,r,loc,z,0
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(dspace,0,0)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,411
-e,nodeNo1,nodeNo2                     
-type,34
-real,406
-mat,7
-e,nodeNo1,nodeNo2             
+e,nodeNo1,nodeNo2                                  
 -------center top wall-------------------------------
 l,kp_10,kp_11,num_center_floor        !center top floor
 type,33
@@ -1529,33 +1519,31 @@ lsel,r,loc,z,0
 lmesh,all                                        
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,dspace,0)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,17
 real,412
-e,nodeNo1,nodeNo2                     
-type,34
-real,407
-mat,7
-e,nodeNo1,nodeNo2            
+e,nodeNo1,nodeNo2                                 
 -------center bottom wall-------------------------------
 l,kp_12,kp_13,num_center_floor      !center bottom floor
 type,33
 mat,2
-real,408
+real,407
 lsel,s,loc,x,0
 lsel,r,loc,y,-dspace-df_center/2
 lsel,r,loc,z,0
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,-dspace,0)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,17
-real,413
+real,412
 e,nodeNo1,nodeNo2                      
-type,34
-real,408
-mat,7
-e,nodeNo1,nodeNo2
 -----------------------------------------------------------------------------
 -------------model geometries------------------
 -------------top room-----------------------
@@ -1610,14 +1598,13 @@ lsel,r,loc,z,dspace+dw_center_front/2
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,0,dspace)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,508
 e,nodeNo1,nodeNo2                   
-type,34
-real,503
-mat,7
-e,nodeNo1,nodeNo2
 -------center back wall-------------------------------
 l,kp_4,kp_5,numw_center_back      
 type,33
@@ -1629,14 +1616,13 @@ lsel,r,loc,z,-dspace-dw_center_back/2
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,0,-dspace)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,509
 e,nodeNo1,nodeNo2                      
-type,34
-real,504
-mat,7
-e,nodeNo1,nodeNo2
 -------center left wall-------------------------------
 l,kp_6,kp_7,numw_center_left 
 type,33
@@ -1648,14 +1634,13 @@ lsel,r,loc,z,0
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(-dspace,0,0)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,510
-e,nodeNo1,nodeNo2                     
-type,34
-real,505
-mat,7
-e,nodeNo1,nodeNo2 
+e,nodeNo1,nodeNo2                      
 -------center right wall-------------------------------
 l,kp_8,kp_9,numw_center_right      
 type,33
@@ -1667,14 +1652,13 @@ lsel,r,loc,z,0
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(dspace,0,0)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,511
-e,nodeNo1,nodeNo2                     
-type,34
-real,506
-mat,7
-e,nodeNo1,nodeNo2             
+e,nodeNo1,nodeNo2                                  
 -------center top wall-------------------------------
 l,kp_10,kp_11,num_center_floor        !center top floor
 type,33
@@ -1686,33 +1670,31 @@ lsel,r,loc,z,0
 lmesh,all                                        
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,dspace,0)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,17
 real,512
-e,nodeNo1,nodeNo2                     
-type,34
-real,507
-mat,7
-e,nodeNo1,nodeNo2            
+e,nodeNo1,nodeNo2                                 
 -------center bottom wall-------------------------------
 l,kp_12,kp_13,num_center_floor      !center bottom floor
 type,33
 mat,2
-real,508
+real,507
 lsel,s,loc,x,0
 lsel,r,loc,y,-dspace-df_center/2
 lsel,r,loc,z,0
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,-dspace,0)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,17
-real,513
+real,512
 e,nodeNo1,nodeNo2                      
-type,34
-real,508
-mat,7
-e,nodeNo1,nodeNo2
 -----------------------------------------------------------------------------
 -------------model geometries------------------
 -------------bottom room-----------------------
@@ -1767,14 +1749,13 @@ lsel,r,loc,z,dspace+dw_center_front/2
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,0,dspace)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,608
 e,nodeNo1,nodeNo2                   
-type,34
-real,603
-mat,7
-e,nodeNo1,nodeNo2
 -------center back wall-------------------------------
 l,kp_4,kp_5,numw_center_back      
 type,33
@@ -1786,14 +1767,13 @@ lsel,r,loc,z,-dspace-dw_center_back/2
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,0,-dspace)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,609
 e,nodeNo1,nodeNo2                      
-type,34
-real,604
-mat,7
-e,nodeNo1,nodeNo2
 -------center left wall-------------------------------
 l,kp_6,kp_7,numw_center_left 
 type,33
@@ -1805,14 +1785,13 @@ lsel,r,loc,z,0
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(-dspace,0,0)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,610
-e,nodeNo1,nodeNo2                     
-type,34
-real,605
-mat,7
-e,nodeNo1,nodeNo2 
+e,nodeNo1,nodeNo2                      
 -------center right wall-------------------------------
 l,kp_8,kp_9,numw_center_right      
 type,33
@@ -1824,14 +1803,13 @@ lsel,r,loc,z,0
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(dspace,0,0)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,16
 real,611
-e,nodeNo1,nodeNo2                     
-type,34
-real,606
-mat,7
-e,nodeNo1,nodeNo2             
+e,nodeNo1,nodeNo2                                  
 -------center top wall-------------------------------
 l,kp_10,kp_11,num_center_floor        !center top floor
 type,33
@@ -1843,30 +1821,142 @@ lsel,r,loc,z,0
 lmesh,all                                        
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,dspace,0)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,17
 real,612
-e,nodeNo1,nodeNo2                     
-type,34
-real,607
-mat,7
-e,nodeNo1,nodeNo2            
+e,nodeNo1,nodeNo2                                 
 -------center bottom wall-------------------------------
 l,kp_12,kp_13,num_center_floor      !center bottom floor
 type,33
 mat,2
-real,608
+real,607
 lsel,s,loc,x,0
 lsel,r,loc,y,-dspace-df_center/2
 lsel,r,loc,z,0
 lmesh,all                                          
 nodeNo1=node(0,0,0)
 nodeNo2=node(0,-dspace,0)
+type,34
+mat,8
+e,nodeNo1,nodeNo2
 type,31
 mat,17
-real,613
+real,612
 e,nodeNo1,nodeNo2                      
-type,34
-real,608
-mat,7
-e,nodeNo1,nodeNo2
+
+allsel
+---------------------modify double lines----------------
+csys,0
+Xcenter_center=0
+Ycenter_center=0
+Zcenter_center=0
+clocal,11,0,Xcenter_center,Ycenter_center,Zcenter_center
+csys,11
+wpcsys,1,11
+-------center front wall-------------------------------
+lsel,s,loc,x,0
+lsel,r,loc,y,0
+lsel,r,loc,z,dspace+dw_center_front/2
+lclear,all
+ksll,s
+NUMMRG,kp
+type,33
+mat,1
+real,3
+lmesh,all                                                  
+-------center back wall------------------------------- 
+lsel,s,loc,x,0
+lsel,r,loc,y,0
+lsel,r,loc,z,-dspace-dw_center_back/2
+lclear,all
+ksll,s
+NUMMRG,kp
+type,33
+mat,1
+real,4                              !!!!ATTENTION!!!!!
+lmesh,all                                                               
+-------center left wall-------------------------------
+lsel,s,loc,x,-dspace-dw_center_left/2
+lsel,r,loc,y,0
+lsel,r,loc,z,0
+lclear,all
+ksll,s
+NUMMRG,kp
+type,33
+mat,1
+real,5
+lmesh,all                                                             
+-------center right wall-------------------------------   
+lsel,s,loc,x,dspace+dw_center_right/2
+lsel,r,loc,y,0
+lsel,r,loc,z,0
+lclear,all
+ksll,s
+NUMMRG,kp
+type,33
+mat,1
+real,6
+lmesh,all                                                                           
+-------center top wall-------------------------------
+lsel,s,loc,x,0
+lsel,r,loc,y,dspace+df_center/2
+lsel,r,loc,z,0
+lclear,all
+ksll,s
+NUMMRG,kp
+type,33
+mat,2
+real,7
+lmesh,all                                                         
+-------center bottom wall-------------------------------
+lsel,s,loc,x,0
+lsel,r,loc,y,-dspace-df_center/2
+lsel,r,loc,z,0
+lclear,all
+ksll,s
+NUMMRG,kp
+type,33
+mat,2
+real,7
+lmesh,all                                        
+        
+allsel
+NUMMRG,node
+!CPINTF,temp
+
+/solu
+csys,0
+wpcsys,0
+---------load------------------------
+nodeNo1=node(0,0,0)                                !center room gas 
+nodeNo2=node(0,0,dspace+dw_center_front+dspace)    !front room gas
+nodeNo3=node(0,0,-dspace-dw_center_back-dspace)    !back room gas
+nodeNo4=node(-dspace-dw_center_left-dspace,0,0)    !left room gas
+nodeNo5=node(dspace+dw_center_right+dspace,0,0)    !right room gas
+nodeNo6=node(0,dspace+df_center+dspace,0)          !top room gas
+nodeNo7=node(0,-dspace-df_center-dspace,0)         !bottom room gas
+nodeNo8=node(dspace,-dspace,-dspace)               !outside 
+toffset,273
+tunif,20
+esel,s,mat,,5
+bfe,all,hgen,,%HRR_center%
+allsel
+!d,nodeNo2,temp,20
+!d,nodeNo3,temp,20
+!d,nodeNo4,temp,20
+!d,nodeNo5,temp,20
+!d,nodeNo6,temp,20
+!d,nodeNo7,temp,20
+d,nodeNo8,temp,20
+allsel
+/solu
+antype,4
+autots,on
+deltim,10,0.1,100
+time,1800
+outres,all,all
+allsel
+solve
